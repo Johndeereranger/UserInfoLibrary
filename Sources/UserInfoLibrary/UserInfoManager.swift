@@ -52,8 +52,8 @@ public final class UserInfoManager: @unchecked Sendable {
             }
 
             guard let data = snapshot?.data(),
-                  let name = data["name"] as? String,
-                  let email = data["email"] as? String else {
+                  let name = data["documentID"] as? String,
+                  let email = data["userIDCreateDate"] as? String else {
                 completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid data"])))
                 return
             }
