@@ -34,6 +34,22 @@ public class FirebaseImageManager: @unchecked Sendable  {
         let url = try await imageRef.downloadURL()
         return url.absoluteString
     }
+    
+    /// Retrieves an image from Firebase Storage.
+    /// - Parameters:
+    ///   - path: The path within Firebase Storage where the image is stored.
+    /// - Returns: A `UIImage` object.
+    public func getImage(atPath path: String) async throws -> UIImage {
+        let imageRef = storage.child(path)
+        let maxDownloadSize: Int64 = 5 * 1024 * 1024
+        
+        let data = try await imageRef.getData(maxSize: maxDownloadSize)
+        guard let image = UIImage(data: data) else {
+            throw StorageError.failedToConvertDataToImage
+        }
+        return image
+    }
+    
     public func storeImage(_ image: UIImage, atPath path: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.75) else {
             completion(.failure(StorageError.failedToConvertImage))
@@ -76,42 +92,6 @@ public class FirebaseImageManager: @unchecked Sendable  {
         }
     }
     
-    public func saveImageLocally(_ image: UIImage, withName name: String) -> Result<Bool, Error> {
-        guard let data = image.jpegData(compressionQuality: 1.0) else {
-            return .failure(LocalStorageError.failedToConvertImage)
-        }
-        do {
-            let filename = getDocumentsDirectory().appendingPathComponent(name)
-            try data.write(to: filename, options: [.atomicWrite, .completeFileProtection])
-            return .success(true)
-        } catch {
-            return .failure(error)
-        }
-    }
-
-    public func loadImageFromLocal(withName name: String) -> Result<UIImage, Error> {
-        let fileURL = getDocumentsDirectory().appendingPathComponent(name)
-        do {
-            let imageData = try Data(contentsOf: fileURL)
-            if let image = UIImage(data: imageData) {
-                return .success(image)
-            } else {
-                return .failure(LocalStorageError.failedToConvertDataToImage)
-            }
-        } catch {
-            return .failure(error)
-        }
-    }
-
-    private func getDocumentsDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        return paths[0]
-    }
-
-    public enum LocalStorageError: Error {
-        case failedToConvertImage
-        case failedToConvertDataToImage
-    }
 }
 
 public enum StorageError: Error {
@@ -121,3 +101,50 @@ public enum StorageError: Error {
     case unknown
 }
 
+
+extension StorageReference {
+    /// Async wrapper for `putData`.
+    func putDataAsync(_ data: Data, metadata: StorageMetadata?) async throws -> StorageMetadata {
+        try await withCheckedThrowingContinuation { continuation in
+            putData(data, metadata: metadata) { metadata, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let metadata = metadata {
+                    continuation.resume(returning: metadata)
+                } else {
+                    continuation.resume(throwing: StorageError.unknown)
+                }
+            }
+        }
+    }
+    
+    /// Async wrapper for `getData`.
+    func getData(maxSize: Int64) async throws -> Data {
+        try await withCheckedThrowingContinuation { continuation in
+            getData(maxSize: maxSize) { data, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let data = data {
+                    continuation.resume(returning: data)
+                } else {
+                    continuation.resume(throwing: StorageError.unknown)
+                }
+            }
+        }
+    }
+    
+    /// Async wrapper for `downloadURL`.
+    func downloadURL() async throws -> URL {
+        try await withCheckedThrowingContinuation { continuation in
+            downloadURL { url, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let url = url {
+                    continuation.resume(returning: url)
+                } else {
+                    continuation.resume(throwing: StorageError.unknown)
+                }
+            }
+        }
+    }
+}
