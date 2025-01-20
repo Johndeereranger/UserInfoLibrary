@@ -9,7 +9,7 @@ import Foundation
 import FirebaseStorage
 import UIKit
 
-public class FirebaseImageManager {
+public class FirebaseImageManager: @unchecked Sendable  {
     
     public static let shared = FirebaseImageManager()
     private let storage = Storage.storage().reference()
