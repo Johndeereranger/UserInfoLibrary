@@ -23,9 +23,8 @@ let package = Package(
           .target(
               name: "UserInfoLibrary",
               dependencies: [
-                  .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"), // Explicit Firestore dependency
-                    .product(name: "FirebaseStorage", package: "firebase-ios-sdk"),
-                                  .product(name: "FirebaseCore", package: "firebase-ios-sdk")
+                .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
+                              .product(name: "FirebaseStorage", package: "firebase-ios-sdk")
               ]
           )
       ])
