@@ -20,20 +20,48 @@ public class FirebaseImageManager: @unchecked Sendable  {
     ///   - image: The `UIImage` to be stored.
     ///   - path: The path within Firebase Storage where the image will be stored.
     /// - Returns: The download URL as a string.
+//    public func storeImage(_ image: UIImage, atPath path: String) async throws -> String {
+//        guard let imageData = image.jpegData(compressionQuality: 0.75) else {
+//            throw StorageError.failedToConvertImage
+//        }
+//        
+//        let imageRef = storage.child(path)
+//        
+//        // Upload data to Firebase Storage
+//        _ = try await imageRef.putDataAsync(imageData, metadata: nil)
+//        
+//        // Get the download URL
+//        let url = try await imageRef.downloadURL()
+//        return url.absoluteString
+//    }
     public func storeImage(_ image: UIImage, atPath path: String) async throws -> String {
         guard let imageData = image.jpegData(compressionQuality: 0.75) else {
             throw StorageError.failedToConvertImage
         }
-        
+
         let imageRef = storage.child(path)
-        
-        // Upload data to Firebase Storage
-        _ = try await imageRef.putDataAsync(imageData, metadata: nil)
-        
-        // Get the download URL
-        let url = try await imageRef.downloadURL()
-        return url.absoluteString
+
+        return try await withCheckedThrowingContinuation { continuation in
+            imageRef.putData(imageData, metadata: nil) { _, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                // Retrieve the download URL after the upload succeeds
+                imageRef.downloadURL { url, error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                    } else if let url = url {
+                        continuation.resume(returning: url.absoluteString)
+                    } else {
+                        continuation.resume(throwing: StorageError.unknown)
+                    }
+                }
+            }
+        }
     }
+
     
     /// Retrieves an image from Firebase Storage.
     /// - Parameters:
@@ -104,19 +132,43 @@ public enum StorageError: Error {
 
 extension StorageReference {
     /// Async wrapper for `putData`.
+//    func putDataAsync(_ data: Data, metadata: StorageMetadata?) async throws -> StorageMetadata {
+//        try await withCheckedThrowingContinuation { continuation in
+//            putData(data, metadata: metadata) { metadata, error in
+//                if let error = error {
+//                    continuation.resume(throwing: error)
+//                } else if let metadata = metadata {
+//                    continuation.resume(returning: metadata)
+//                } else {
+//                    continuation.resume(throwing: StorageError.unknown)
+//                }
+//            }
+//        }
+//    }
+  
+        /// Async wrapper for `putData`.
     func putDataAsync(_ data: Data, metadata: StorageMetadata?) async throws -> StorageMetadata {
         try await withCheckedThrowingContinuation { continuation in
             putData(data, metadata: metadata) { metadata, error in
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else if let metadata = metadata {
-                    continuation.resume(returning: metadata)
+                    // Create a new instance by extracting only the necessary data
+                    let safeMetadata = StorageMetadata()
+                    safeMetadata.contentType = metadata.contentType
+                    safeMetadata.cacheControl = metadata.cacheControl
+                    safeMetadata.customMetadata = metadata.customMetadata
+                    
+                    
+                    continuation.resume(returning: safeMetadata)
                 } else {
                     continuation.resume(throwing: StorageError.unknown)
                 }
             }
         }
     }
+    
+
     
     /// Async wrapper for `getData`.
     func getData(maxSize: Int64) async throws -> Data {
