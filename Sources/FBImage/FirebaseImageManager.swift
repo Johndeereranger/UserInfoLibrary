@@ -15,7 +15,25 @@ public class FirebaseImageManager {
     private let storage = Storage.storage().reference()
     
     private init() {} // Private initializer to enforce singleton
-    
+    /// Stores an image in Firebase Storage.
+    /// - Parameters:
+    ///   - image: The `UIImage` to be stored.
+    ///   - path: The path within Firebase Storage where the image will be stored.
+    /// - Returns: The download URL as a string.
+    public func storeImage(_ image: UIImage, atPath path: String) async throws -> String {
+        guard let imageData = image.jpegData(compressionQuality: 0.75) else {
+            throw StorageError.failedToConvertImage
+        }
+        
+        let imageRef = storage.child(path)
+        
+        // Upload data to Firebase Storage
+        _ = try await imageRef.putDataAsync(imageData, metadata: nil)
+        
+        // Get the download URL
+        let url = try await imageRef.downloadURL()
+        return url.absoluteString
+    }
     public func storeImage(_ image: UIImage, atPath path: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.75) else {
             completion(.failure(StorageError.failedToConvertImage))
