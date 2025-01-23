@@ -23,6 +23,7 @@ public struct UserInfo: Sendable {
     
 
     // General optional fields
+    public let uid: String?
     public let email: String?
     public var name: String?
     public var firstName: String?
@@ -52,7 +53,8 @@ public struct UserInfo: Sendable {
     public init(
         id: String,
         documentID: String,
-        email: String,
+        uid: String? = nil,
+        email: String? = nil,
         name: String? = nil,
         firstName: String? = nil,
         lastName: String? = nil,
@@ -69,6 +71,7 @@ public struct UserInfo: Sendable {
     ) {
         self.id = id
         self.documentID = documentID
+        self.uid = uid
         self.email = email
         self.name = name
         self.firstName = firstName
@@ -104,6 +107,7 @@ public struct UserInfo: Sendable {
         
         self.email = data["email"] as? String
         self.name = data["name"] as? String
+        self.uid = data["uid"] as? String
         self.firstName = data["firstName"] as? String
         self.lastName = data["lastName"] as? String
         self.phoneNumber = data["phoneNumber"] as? String
