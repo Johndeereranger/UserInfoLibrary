@@ -8,17 +8,17 @@
 //test
 import Foundation
 
-public struct UserInfo: Sendable {
-    public let id: String
-    public let name: String
-    public let email: String
-
-    public init(id: String, name: String, email: String) {
-        self.id = id
-        self.name = name
-        self.email = email
-    }
-}
+//public struct UserInfo: Sendable {
+//    public let id: String
+//    public let name: String
+//    public let email: String
+//
+//    public init(id: String, name: String, email: String) {
+//        self.id = id
+//        self.name = name
+//        self.email = email
+//    }
+//}
 
 import FirebaseCore
 
@@ -44,22 +44,58 @@ public final class UserInfoManager: @unchecked Sendable {
         _ = FirebaseManager.shared
     }
 
-    public func fetchUserInfo(userId: String, completion: @escaping (Result<UserInfo, Error>) -> Void) {
-        db.collection("users").document(userId).getDocument { snapshot, error in
+//    public func fetchUserInfo(userId: String, completion: @escaping (Result<UserInfo, Error>) -> Void) {
+//        db.collection("users").document(userId).getDocument { snapshot, error in
+//            if let error = error {
+//                completion(.failure(error))
+//                return
+//            }
+//
+//            guard let data = snapshot?.data(),
+//                  let name = data["documentID"] as? String,
+//                  let email = data["userIDCreateDate"] as? String else {
+//                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid data"])))
+//                return
+//            }
+//
+//            let userInfo = UserInfo(id: userId, name: name, email: email)
+//            completion(.success(userInfo))
+//        }
+//    }
+
+    public func fetchAllUsers(completion: @escaping (Result<[UserInfo], Error>) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("users").getDocuments(source: .default) { snapshot, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
-
-            guard let data = snapshot?.data(),
-                  let name = data["documentID"] as? String,
-                  let email = data["userIDCreateDate"] as? String else {
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid data"])))
+            guard let documents = snapshot?.documents else {
+                completion(.success([]))
                 return
             }
 
-            let userInfo = UserInfo(id: userId, name: name, email: email)
-            completion(.success(userInfo))
+            // Use the UserInfo initializer with DocumentSnapshot
+            let users = documents.compactMap { UserInfo(document: $0) }
+            completion(.success(users))
         }
     }
+    
+    public func fetchAllUsers() async throws -> [UserInfo] {
+        let db = Firestore.firestore()
+
+        do {
+            // Fetch the snapshot asynchronously
+            let snapshot = try await db.collection("users").getDocuments(source: .default)
+
+            // Use the UserInfo initializer to parse documents
+            let users = snapshot.documents.compactMap { UserInfo(document: $0) }
+            return users
+        } catch {
+            // Propagate the error to the caller
+            throw error
+        }
+    }
+    
+    
 }
