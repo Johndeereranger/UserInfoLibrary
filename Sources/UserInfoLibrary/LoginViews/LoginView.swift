@@ -22,7 +22,7 @@ public struct LoginView: View {
     @State private var image: UIImage?
     @State private var loginStatusMessage = ""
 
-    public init(didCompleteLoginProcess: @escaping () -> (), image: UIImage? = nil) {
+    public init(image: UIImage? = nil, didCompleteLoginProcess: @escaping () -> ()) {
           self.didCompleteLoginProcess = didCompleteLoginProcess
           self._image = State(initialValue: image) // Bind the passed image
       }
