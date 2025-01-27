@@ -20,8 +20,8 @@ import Foundation
 //    }
 //}
 
-//import FirebaseCore
-import FirebaseFirestore
+import FirebaseCore
+//import FirebaseFirestore
 
 public class FirebaseManager: @unchecked Sendable {
     public static let shared = FirebaseManager()
