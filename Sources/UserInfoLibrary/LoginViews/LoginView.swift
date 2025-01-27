@@ -164,9 +164,17 @@ struct UserCredentialsView: View {
 }
 
 // MARK: - ActionButtonView
-struct ActionButtonView: View {
+// MARK: - ActionButtonView
+struct ActionButtonView<Style: ButtonStyle>: View {
     var isLoginMode: Bool
     var action: () -> Void
+    var buttonStyle: Style
+
+    init(isLoginMode: Bool, action: @escaping () -> Void, buttonStyle: Style = ActionButtonBlueButtonStyle()) {
+        self.isLoginMode = isLoginMode
+        self.action = action
+        self.buttonStyle = buttonStyle
+    }
 
     var body: some View {
         Button(action: action) {
@@ -180,26 +188,33 @@ struct ActionButtonView: View {
                 Spacer()
             }
         }
-        //.blueButtonStyle()
+        .buttonStyle(buttonStyle)
     }
 }
 
+
 // MARK: - PasswordResetButtonView
-struct PasswordResetButtonView: View {
+struct PasswordResetButtonView<Style: ButtonStyle>: View {
     var action: () -> Void
+    var buttonStyle: Style
+
+    init(action: @escaping () -> Void, buttonStyle: Style = PasswordResetLightGreyButtonStyle()) {
+        self.action = action
+        self.buttonStyle = buttonStyle
+    }
 
     var body: some View {
         Button(action: action) {
             HStack {
                 Spacer()
-                Text("Email Password Reset")
-                    .foregroundColor(.black)
+                Text("Reset Password")
+                    .foregroundColor(.black) // Matches the light grey button style
                     .padding(.vertical, 10)
                     .font(.system(size: 14, weight: .semibold))
                     .frame(maxWidth: .infinity, alignment: .center)
                 Spacer()
             }
         }
-        //.lightGreyButtonStyle()
+        .buttonStyle(buttonStyle)
     }
 }
