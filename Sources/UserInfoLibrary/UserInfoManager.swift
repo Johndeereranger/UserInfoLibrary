@@ -20,7 +20,8 @@ import Foundation
 //    }
 //}
 
-import FirebaseCore
+//import FirebaseCore
+import FirebaseFirestore
 
 public class FirebaseManager: @unchecked Sendable {
     public static let shared = FirebaseManager()
@@ -95,6 +96,18 @@ public final class UserInfoManager: @unchecked Sendable {
             // Propagate the error to the caller
             throw error
         }
+    }
+    
+    private func getTodayDateString() -> String {
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        return df.string(from: Date())
+    }
+    
+    public func appAccessedToday(userID: String) {
+        let db = Firestore.firestore().collection("users").document(userID)
+        let todayString = getTodayDateString()
+        db.updateData(["accessDates" : FieldValue.arrayUnion([todayString])])
     }
     
     
