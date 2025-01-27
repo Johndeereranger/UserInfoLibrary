@@ -22,9 +22,10 @@ public struct LoginView: View {
     @State private var image: UIImage?
     @State private var loginStatusMessage = ""
 
-    public init(didCompleteLoginProcess: @escaping () -> ()) {
-        self.didCompleteLoginProcess = didCompleteLoginProcess
-    }
+    public init(didCompleteLoginProcess: @escaping () -> (), image: UIImage? = nil) {
+          self.didCompleteLoginProcess = didCompleteLoginProcess
+          self._image = State(initialValue: image) // Bind the passed image
+      }
 
     public var body: some View {
         NavigationView {
