@@ -45,24 +45,43 @@ public final class UserInfoManager: @unchecked Sendable {
         _ = FirebaseManager.shared
     }
 
-//    public func fetchUserInfo(userId: String, completion: @escaping (Result<UserInfo, Error>) -> Void) {
-//        db.collection("users").document(userId).getDocument { snapshot, error in
-//            if let error = error {
-//                completion(.failure(error))
-//                return
-//            }
-//
-//            guard let data = snapshot?.data(),
-//                  let name = data["documentID"] as? String,
-//                  let email = data["userIDCreateDate"] as? String else {
-//                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid data"])))
-//                return
-//            }
-//
-//            let userInfo = UserInfo(id: userId, name: name, email: email)
-//            completion(.success(userInfo))
-//        }
-//    }
+    public func fetchUserInfo(userId: String, completion: @escaping (Result<UserInfo, Error>) -> Void) {
+        let db = Firestore.firestore()
+        
+        db.collection("users").document(userId).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let snapshot = snapshot, snapshot.exists, let userInfo = UserInfo(document: snapshot) else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid or missing user data."])))
+                return
+            }
+            
+            completion(.success(userInfo))
+        }
+    }
+    public func fetchUserInfo(userId: String) async throws -> UserInfo {
+        let db = Firestore.firestore()
+
+        do {
+            // Fetch the document snapshot asynchronously
+            let snapshot = try await db.collection("users").document(userId).getDocument()
+
+            // Validate and parse the snapshot into a UserInfo object
+            guard snapshot.exists, let userInfo = UserInfo(document: snapshot) else {
+                throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid or missing user data."])
+            }
+
+            return userInfo
+        } catch {
+            // Propagate the error to the caller
+            throw error
+        }
+    }
+
+
 
     public func fetchAllUsers(completion: @escaping (Result<[UserInfo], Error>) -> Void) {
         let db = Firestore.firestore()
