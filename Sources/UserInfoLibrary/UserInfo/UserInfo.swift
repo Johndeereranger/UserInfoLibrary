@@ -37,6 +37,7 @@ public struct UserInfo: Sendable {
     public var profilePictureURL: String?
     public var lastLoginDate: String?
     public var isActive: Bool?
+    public var isAdmin: Bool?
 
     // Metadata fields
     public var metadata: [String: MetadataValue]?
@@ -67,6 +68,7 @@ public struct UserInfo: Sendable {
         profilePictureURL: String? = nil,
         lastLoginDate: String? = nil,
         isActive: Bool? = nil,
+        isAdmin: Bool? = nil,
         metadata: [String: MetadataValue]? = nil
     ) {
         self.id = id
@@ -86,6 +88,7 @@ public struct UserInfo: Sendable {
         self.lastLoginDate = lastLoginDate
         self.isActive = isActive
         self.metadata = metadata
+        self.isAdmin = isAdmin
     }
     
     
@@ -119,6 +122,7 @@ public struct UserInfo: Sendable {
         self.profilePictureURL = data["profilePictureURL"] as? String
         self.lastLoginDate = data["lastLoginDate"] as? String
         self.isActive = data["isActive"] as? Bool
+        self.isAdmin = data["isAdmin"] as? Bool
 
         // Parse metadata
         var metadata: [String: MetadataValue] = [:]
