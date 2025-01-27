@@ -110,5 +110,23 @@ public final class UserInfoManager: @unchecked Sendable {
         db.updateData(["accessDates" : FieldValue.arrayUnion([todayString])])
     }
     
+    public func createUser(email: String, firstName: String, lastName: String, uid: String) {
+        let todayString = getTodayDateString()
+        let userData: [String: Any] = [
+            "email": email,
+            "firstName": firstName,
+            "lastName": lastName,
+            "uid": uid,
+            "signUpDate": todayString,
+            "accessDates": [todayString]
+        ]
+        
+        Firestore.firestore().collection("users").document(uid).setData(userData) { error in
+            if let error = error {
+                print("Failed to save user data: \(error)")
+            }
+        }
+        
+    }
     
 }
