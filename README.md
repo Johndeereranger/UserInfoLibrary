@@ -27,3 +27,17 @@ If UIKIT:
 
         return true
     }
+
+
+implimentation in UIKIT:   
+ func handlePMF(){
+        PMFManager.instance.shouldShowPMF { result in
+            if result {
+                print("Show that PMF")
+                PMFManager.instance.presentSurvey(topImageName: "top", from: self)
+            } else {
+                print("No Show PMF")
+                //TODO: Check for app upates
+            }
+        }
+    }

@@ -55,10 +55,10 @@ public class PMFManager {
         }
     }
 
-    public func shouldShowPMF(completion: @escaping (Bool) -> Void) {
+    public func shouldShowPMF(completion: @escaping (Bool, String) -> Void) {
         guard let uid = AuthHelper.currentUserID else {
             print("User ID not found")
-            completion(false)
+            completion(false,"User ID not found")
             return
         }
 
@@ -71,14 +71,14 @@ public class PMFManager {
         Firestore.firestore().collection("users").document(uid).getDocument { snapshot, error in
             if let error = error {
                 print("Error retrieving user data: \(error.localizedDescription)")
-                completion(false)
+                completion(false, "Error retrieving user data: \(error.localizedDescription)")
                 return
             }
 
             guard let data = snapshot?.data(),
                   let accessDates = data["accessDates"] as? [String] else {
                 print("Invalid access dates format or missing data")
-                completion(false)
+                completion(false, "Invalid access dates format or missing data")
                 return
             }
 
@@ -88,27 +88,27 @@ public class PMFManager {
 
             if hasAnsweredPMF {
                 print("PMF survey already answered.")
-                completion(false)
+                completion(false,"PMF survey already answered.")
                 return
             }
 
             if usageCountAtLastSurvey == 0 && totalUsageCount >= 4 {
                 print("Eligible for the first PMF survey.")
                 self.recordSurveyShown(currentUsage: totalUsageCount)
-                completion(true)
+                completion(true,"Eligible for the first PMF survey.")
                 return
             }
 
             let timeSinceLastSurvey = Date().timeIntervalSince1970 - lastPMFShownTimestamp
             if timeSinceLastSurvey < ninetyDaysInSeconds {
                 print("No PMF Show: Not enough time since last survey.")
-                completion(false)
+                completion(false,"No PMF Show: Not enough time since last survey.")
                 return
             }
 
             if additionalUsageSinceLastSurvey < 10 {
                 print("No PMF Show: Not enough additional usage since last survey.")
-                completion(false)
+                completion(false,"No PMF Show: Not enough additional usage since last survey.")
                 return
             }
 
@@ -116,14 +116,14 @@ public class PMFManager {
                 let accessSinceLastDecline = totalUsageCount - lastDeclinedAccessCount
                 if accessSinceLastDecline < 3 {
                     print("No PMF Show: Not enough access dates since last PMF decline.")
-                    completion(false)
+                    completion(false, "No PMF Show: Not enough access dates since last PMF decline.")
                     return
                 }
             }
 
             print("User is eligible to be shown the PMF survey.")
             self.recordSurveyShown(currentUsage: totalUsageCount)
-            completion(true)
+            completion(true, "User is eligible to be shown the PMF survey.")
         }
     }
 
