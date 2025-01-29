@@ -114,10 +114,11 @@ public actor PMFDataManager {
             var allResponses: [PMFResponse] = []
 
             for document in snapshot.documents {
-                if let data = document.data(),
-                   let pmfResponses = data[pmfResponsesKey] as? [[String: Any]] {
+                
+                 let data = document.data()
+                if let pmfResponses = data[pmfResponsesKey] as? [[String: Any]] {
                     print("User \(document.documentID) has \(pmfResponses.count) PMF responses.") // Debug Log
-
+                    
                     let responses = pmfResponses.compactMap { PMFResponse(from: $0) }
                     allResponses.append(contentsOf: responses)
                 }
@@ -131,3 +132,4 @@ public actor PMFDataManager {
         }
     }
 }
+
