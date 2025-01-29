@@ -69,6 +69,10 @@ public class PMFManager {
             showPMF = false
         }
         
+        if showPMF {
+            print("Force Show PMF")
+            completion(true)
+        }
         guard let uid = PMFConfigurationProvider.userID else {
             print("PMF Manager - User ID not found")
             completion(false)
