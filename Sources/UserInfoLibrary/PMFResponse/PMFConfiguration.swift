@@ -11,6 +11,8 @@ import SwiftUI
 public protocol PMFConfiguration {
     /// The image name or SwiftUI `Image` the app wants to display.
     static var productMarketFitImage: Image { get }
+    
+    static func getUserID() -> String?
 }
 
 import SwiftUI
@@ -25,4 +27,9 @@ public class PMFConfigurationProvider {
     public static var image: Image {
         return configuration?.productMarketFitImage ?? Image(systemName: "questionmark.circle")
     }
+    
+    public static var userID: String? {
+           return configuration?.getUserID()
+       }
 }
+
