@@ -16,7 +16,7 @@ public enum MetadataValue: Sendable, Codable {
     case array([String])
 }
 
-public struct UserInfo: Sendable {
+public struct UserInfo: Sendable, Codable {
     // Core required fields
     public let id: String
     public let documentID: String
@@ -38,7 +38,18 @@ public struct UserInfo: Sendable {
     public var lastLoginDate: String?
     public var isActive: Bool?
     public var isAdmin: Bool?
+    
+    //NC Waterfalls
+    public var userIDCreateDate: String?
+     public var systemVersion: String?
+     public var purchased: Bool?
+     public var purchasedDate: String?
+     public var approvedRisk: [String]?
+     public var declinedRisk: [String]?
+     public var waterfallsVisited: [String]?
+     public var idfa: String?
 
+    public var pmfResponses: [PMFResponse]?
     // Metadata fields
     public var metadata: [String: MetadataValue]?
 
@@ -123,6 +134,36 @@ public struct UserInfo: Sendable {
         self.lastLoginDate = data["lastLoginDate"] as? String
         self.isActive = data["isActive"] as? Bool
         self.isAdmin = data["isAdmin"] as? Bool
+        
+        self.userIDCreateDate = data["userIDCreateDate"] as? String
+          self.systemVersion = data["systemVersion"] as? String
+          self.purchased = data["purchased"] as? Bool
+          self.purchasedDate = data["purchasedDate"] as? String
+          self.approvedRisk = data["approvedRisk"] as? [String]
+          self.declinedRisk = data["declinedRisk"] as? [String]
+          self.waterfallsVisited = data["WaterfallsVisited"] as? [String]
+          self.idfa = data["idfa"] as? String
+        
+        // Decode `pmfResponses` safely
+          if let pmfData = data["pmfResponses"] as? [[String: Any]] {
+              self.pmfResponses = pmfData.compactMap { dict in
+                  guard let sessionID = dict["sessionID"] as? String,
+                        let answeredAtTimestamp = dict["answeredAt"] as? Timestamp else {
+                      return nil
+                  }
+                  return PMFResponse(
+                      sessionID: sessionID,
+                      feedback: dict["feedback"] as? String,
+                      mainBenefit: dict["mainBenefit"] as? String,
+                      improvementSuggestions: dict["improvementSuggestions"] as? String,
+                      answeredAt: answeredAtTimestamp.dateValue(),
+                      usageCountAtSurvey: dict["usageCountAtSurvey"] as? Int
+                      
+                  )
+              }
+          } else {
+              self.pmfResponses = nil
+          }
 
         // Parse metadata
         var metadata: [String: MetadataValue] = [:]
@@ -161,4 +202,3 @@ public func extractDocumentID(from document: DocumentSnapshot) -> String? {
     // Fallback to Firestore's document.documentID
     return document.documentID
 }
-
