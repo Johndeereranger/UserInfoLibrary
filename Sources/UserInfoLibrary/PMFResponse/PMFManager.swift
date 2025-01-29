@@ -54,8 +54,21 @@ public class PMFManager {
             self.navigator.startSurvey(from: viewController, initialView: initialView)
         }
     }
+    
+    private var isTestFlightOrAppStore: Bool {
+        guard let appStoreReceiptURL = Bundle.main.appStoreReceiptURL else { return false }
 
-    public func shouldShowPMF(completion: @escaping (Bool) -> Void) {
+        let path = appStoreReceiptURL.path
+        return path.contains("sandboxReceipt") == false // `sandboxReceipt` is present for TestFlight
+    }
+    
+    public func shouldShowPMF(force: Bool = false, completion: @escaping (Bool) -> Void) {
+        var showPMF: Bool = force
+        
+        if isTestFlightOrAppStore{
+            showPMF = false
+        }
+        
         guard let uid = PMFConfigurationProvider.userID else {
             print("PMF Manager - User ID not found")
             completion(false)
