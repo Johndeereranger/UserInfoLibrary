@@ -103,11 +103,7 @@ public class PMFManager {
             self.totalUsageCount = totalUsageCount
             let additionalUsageSinceLastSurvey = totalUsageCount - usageCountAtLastSurvey
 
-            if hasAnsweredPMF {
-                print("PMF survey already answered.")
-                completion(false, "PMF survey already answered.")
-                return
-            }
+          
 
             if usageCountAtLastSurvey == 0 && totalUsageCount >= 4 {
                 print("Eligible for the first PMF survey.")
