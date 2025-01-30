@@ -63,6 +63,7 @@ public class PMFStatusViewModel: ObservableObject {
     
     func checkShouldShowPMF() {
            PMFManager.instance.shouldShowPMF { shouldShow, message in
+            
                DispatchQueue.main.async {
                    self.shouldShowPMFResult = shouldShow
                    self.shouldShowPMFResultString = message

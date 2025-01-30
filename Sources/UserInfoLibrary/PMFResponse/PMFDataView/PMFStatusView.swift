@@ -81,6 +81,7 @@ public struct PMFStatusView: View {
             .navigationTitle("PMF Debug Info")
             .task {
                 await viewModel.fetchPMFResponses()
+                viewModel.checkShouldShowPMF()
             }
         }
     }
