@@ -26,20 +26,36 @@ public struct PMFStatusView: View {
                         }
                         
                         Section(header: Text("🧐 Should Show PMF?")) {
-                            if let result = viewModel.shouldShowPMFResult {
-                                if result {
-                                    Text("✅ You may be eligible for PMF.")
-                                } else {
-                                    Text("Not Eligible for PMF.")
-                                }
-                            } else {
-                                Text("Checking PMF eligibility...")
+                            VStack(alignment: .leading, spacing: 5) {
+                                // Label above the first result
+                                Text("Should Show PMF Result")
+                                    .font(.caption)
                                     .foregroundColor(.gray)
+
+                                if let result = viewModel.shouldShowPMFResult {
+                                    if result {
+                                        Text("✅ You may be eligible for PMF.")
+                                    } else {
+                                        Text("Not Eligible for PMF.")
+                                    }
+                                } else {
+                                    Text("Checking PMF eligibility...")
+                                        .foregroundColor(.gray)
+                                }
                             }
-                            if let textResult = viewModel.shouldShowPMFResultString {
-                                Text(textResult)
+
+                            VStack(alignment: .leading, spacing: 5) {
+                                // Label above the second result
+                                Text("PMF Result")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+
+                                if let textResult = viewModel.shouldShowPMFResultString {
+                                    Text(textResult)
+                                }
                             }
                         }
+
                         
                         Section(header: Text("📊 PMF Responses")) {
                             if let error = viewModel.pmfErrorMessage {
