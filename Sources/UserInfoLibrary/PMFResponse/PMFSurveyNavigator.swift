@@ -23,6 +23,7 @@ public class PMFSurveyNavigator {
     }
 
     public func presentMultipleChoiceQuestion(onNext: @escaping (String) -> Void) {
+        print("PMF Manager - Presenting multiple choice question")
         let multipleChoiceView = MultipleChoiceQuestionView(onNextTapped: onNext)
         pushSurveyStep(view: multipleChoiceView)
     }
@@ -33,8 +34,13 @@ public class PMFSurveyNavigator {
     }
 
     private func pushSurveyStep(view: some View) {
+        print("PMF Manager - Attempting to push survey step")
         let hostingController = UIHostingController(rootView: view)
-        navigationController?.pushViewController(hostingController, animated: true)
+        guard let navigationController = navigationController else {
+            print("PMF Manager - Navigation controller is nil!")
+            return
+        }
+        navigationController.pushViewController(hostingController, animated: true)
     }
 
     public func dismissSurvey() {
