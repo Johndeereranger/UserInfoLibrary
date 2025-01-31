@@ -181,6 +181,7 @@ public class PMFManager {
     }
 
     public func storePMFResponse(feedback: String? = nil, mainBenefit: String? = nil, improvementSuggestions: String? = nil) {
+      
         guard let totalUsageCount = self.totalUsageCount else {
             print("Total usage count is not available.")
             return
@@ -190,6 +191,9 @@ public class PMFManager {
             print("PMF Manager - storePMFResponse User ID not found.")
             return
         }
+        
+        
+
 
         let userDocRef = Firestore.firestore().collection("users").document(uid)
         let timestamp = Date()

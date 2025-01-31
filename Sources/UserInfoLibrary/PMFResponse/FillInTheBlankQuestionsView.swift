@@ -59,6 +59,7 @@ public struct FillInTheBlankQuestionsView: View {
                         showError = true
                     } else {
                         showError = false
+                        PMFManager.instance.storePMFResponse(mainBenefit: mainBenefit, improvementSuggestions: improvementSuggestions)
                         onSubmitTapped()
                     }
                 }) {
