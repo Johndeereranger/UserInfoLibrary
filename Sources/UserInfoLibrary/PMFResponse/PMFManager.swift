@@ -62,7 +62,7 @@ public class PMFManager {
         return path.contains("sandboxReceipt") == false // `sandboxReceipt` is present for TestFlight
     }
     
-    public func shouldShowPMF(force: Bool = false, completion: @escaping (Bool,String) -> Void) {
+    public func shouldShowPMF(force: Bool = false, shouldPrint: Bool = false, completion: @escaping (Bool,String) -> Void) {
         var showPMF: Bool = force
         
         if isTestFlightOrAppStore{
@@ -98,7 +98,9 @@ public class PMFManager {
                 completion(false, "PMF Manager - Invalid access dates format or missing data")
                 return
             }
-
+            if shouldPrint{
+                print(data)
+            }
             let totalUsageCount = accessDates.count
             self.totalUsageCount = totalUsageCount
             let additionalUsageSinceLastSurvey = totalUsageCount - usageCountAtLastSurvey
@@ -182,10 +184,7 @@ public class PMFManager {
 
     public func storePMFResponse(feedback: String? = nil, mainBenefit: String? = nil, improvementSuggestions: String? = nil) {
       
-        guard let totalUsageCount = self.totalUsageCount else {
-            print("Total usage count is not available.")
-            return
-        }
+        let totalUsageCount = self.totalUsageCount ?? 99999999999
 
         guard let uid = PMFConfigurationProvider.userID else {
             print("PMF Manager - storePMFResponse User ID not found.")
