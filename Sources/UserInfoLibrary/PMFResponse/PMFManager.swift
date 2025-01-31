@@ -40,6 +40,7 @@ public class PMFManager {
         pmfSessionTimestamp = Date()
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             let initialView = ProductMarketFitView(imageName: topImageName, onYesTapped: {
+                print("On yes tapped")
                 self.navigator.presentMultipleChoiceQuestion(onNext: { selectedFeedback in
                     self.storedFeedback = selectedFeedback
                     self.navigator.presentFillInTheBlankQuestions(onSubmit: {
