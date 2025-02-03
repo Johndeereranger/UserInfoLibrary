@@ -134,7 +134,8 @@ public struct LoginView: View {
             email: fields[.email] ?? "",
             password: fields[.password] ?? "",
             firstName: fields[.firstName] ?? "",
-            lastName: fields[.lastName] ?? ""
+            lastName: fields[.lastName] ?? "",
+            companyName: fields[.companyName]
         ) { result in
             switch result {
             case .success:
