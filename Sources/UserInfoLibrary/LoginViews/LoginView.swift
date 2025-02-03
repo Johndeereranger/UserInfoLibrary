@@ -21,11 +21,15 @@ public struct LoginView: View {
     @State private var shouldShowImagePicker = false
     @State private var image: UIImage?
     @State private var loginStatusMessage = ""
-
-    public init(image: UIImage? = nil, didCompleteLoginProcess: @escaping () -> ()) {
-          self.didCompleteLoginProcess = didCompleteLoginProcess
-          self._image = State(initialValue: image) // Bind the passed image
-      }
+    let fieldOrder: [FieldType]
+    @State private var fields: [FieldType: String]
+    
+    public init(image: UIImage? = nil, fieldOrder: [FieldType], didCompleteLoginProcess: @escaping () -> ()) {
+        self.didCompleteLoginProcess = didCompleteLoginProcess
+        self._image = State(initialValue: image) // Bind the passed image
+        self.fieldOrder = fieldOrder
+        _fields = State(initialValue: Dictionary(uniqueKeysWithValues: fieldOrder.map { ($0, "") }))
+    }
 
     public var body: some View {
         NavigationView {
@@ -35,14 +39,19 @@ public struct LoginView: View {
                     LoginPickerView(isLoginMode: $isLoginMode)
                     
                     // User Credential Inputs
-                    UserCredentialsView(
-                        isLoginMode: $isLoginMode,
-                        firstName: $firstName,
-                        lastName: $lastName,
-                        email: $email,
-                        password: $password,
-                        hiddenPassword: $hiddenPassword
-                    )
+//                    UserCredentialsView(
+//                        isLoginMode: $isLoginMode,
+//                        firstName: $firstName,
+//                        lastName: $lastName,
+//                        email: $email,
+//                        password: $password,
+//                        hiddenPassword: $hiddenPassword
+//                    )
+                    
+                    UserCredentialsView(isLoginMode: $isLoginMode,
+                                        fields: $fields,
+                                        hiddenPassword: $hiddenPassword,
+                                        fieldOrder: fieldOrder)
                     
                     // Action Button
                     ActionButtonView(isLoginMode: isLoginMode) {
@@ -123,46 +132,8 @@ struct LoginPickerView: View {
     }
 }
 
-// MARK: - UserCredentialsView
-struct UserCredentialsView: View {
-    @Binding var isLoginMode: Bool
-    @Binding var firstName: String
-    @Binding var lastName: String
-    @Binding var email: String
-    @Binding var password: String
-    @Binding var hiddenPassword: Bool
 
-    var body: some View {
-        Group {
-            if !isLoginMode {
-                CustomTextField(
-                    placeholder: "First Name",
-                    text: $firstName,
-                    isSecure: .constant(false),
-                    placeholderColor: UIColor.lightGray
-                )
-                CustomTextField(
-                    placeholder: "Last Name",
-                    text: $lastName,
-                    isSecure: .constant(false),
-                    placeholderColor: UIColor.lightGray
-                )
-            }
-            CustomTextField(
-                placeholder: "Email",
-                text: $email,
-                isSecure: .constant(false),
-                placeholderColor: UIColor.lightGray
-            )
-            SecureCustomTextField(
-                placeholder: "Password",
-                text: $password,
-                isSecure: $hiddenPassword,
-                placeholderColor: UIColor.lightGray
-            )
-        }
-    }
-}
+
 
 // MARK: - ActionButtonView
 // MARK: - ActionButtonView
