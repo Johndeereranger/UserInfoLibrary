@@ -38,6 +38,7 @@ public struct UserInfo: Sendable, Codable {
     public var lastLoginDate: String?
     public var isActive: Bool?
     public var isAdmin: Bool?
+    public var companyName: String?
     
     //NC Waterfalls
     public var userIDCreateDate: String?
@@ -80,7 +81,9 @@ public struct UserInfo: Sendable, Codable {
         lastLoginDate: String? = nil,
         isActive: Bool? = nil,
         isAdmin: Bool? = nil,
+        companyName: String? = nil,
         metadata: [String: MetadataValue]? = nil
+        
     ) {
         self.id = id
         self.documentID = documentID
@@ -99,6 +102,7 @@ public struct UserInfo: Sendable, Codable {
         self.lastLoginDate = lastLoginDate
         self.isActive = isActive
         self.metadata = metadata
+        self.companyName = companyName
         self.isAdmin = isAdmin
     }
     
@@ -134,6 +138,7 @@ public struct UserInfo: Sendable, Codable {
         self.lastLoginDate = data["lastLoginDate"] as? String
         self.isActive = data["isActive"] as? Bool
         self.isAdmin = data["isAdmin"] as? Bool
+        self.companyName = data["companyName"] as? String
         
         self.userIDCreateDate = data["userIDCreateDate"] as? String
           self.systemVersion = data["systemVersion"] as? String

@@ -129,9 +129,9 @@ public final class UserInfoManager: @unchecked Sendable {
         db.updateData(["accessDates" : FieldValue.arrayUnion([todayString])])
     }
     
-    public func createUser(email: String, firstName: String, lastName: String, uid: String) {
+    public func createUser(email: String, firstName: String, lastName: String, uid: String, companyName: String?) {
         let todayString = getTodayDateString()
-        let userData: [String: Any] = [
+        var userData: [String: Any] = [
             "email": email,
             "firstName": firstName,
             "lastName": lastName,
@@ -139,6 +139,10 @@ public final class UserInfoManager: @unchecked Sendable {
             "signUpDate": todayString,
             "accessDates": [todayString]
         ]
+        
+        if let companyName = companyName {
+            userData["companyName"] = companyName
+        }
         
         Firestore.firestore().collection("users").document(uid).setData(userData) { error in
             if let error = error {

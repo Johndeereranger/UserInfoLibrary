@@ -25,7 +25,8 @@ public class LoginViewModel: ObservableObject {
         email: String,
         password: String,
         firstName: String? = nil,
-        lastName: String? = nil
+        lastName: String? = nil,
+        companyName: String? = nil
     ) async throws {
         loginStatusMessage = ""
         isLoading = true
@@ -44,7 +45,8 @@ public class LoginViewModel: ObservableObject {
                     email: email,
                     password: password,
                     firstName: firstName,
-                    lastName: lastName
+                    lastName: lastName,
+                    companyName: companyName
                 )
             }
             isLoading = false // Success path
@@ -83,7 +85,8 @@ public class LoginViewModel: ObservableObject {
         email: String,
         password: String,
         firstName: String,
-        lastName: String
+        lastName: String,
+        companyName: String?
     ) async throws {
         do {
             // Perform the account creation operation in a detached task
@@ -93,7 +96,7 @@ public class LoginViewModel: ObservableObject {
             }.value
 
             // Execute further operations on the main actor
-            await UserInfoManager.shared.createUser(email: email, firstName: firstName, lastName: lastName, uid: uid)
+            await UserInfoManager.shared.createUser(email: email, firstName: firstName, lastName: lastName, uid: uid, companyName: companyName)
             loginStatusMessage = "Account created successfully."
             print("Account created for user ID: \(uid)")
         } catch {
