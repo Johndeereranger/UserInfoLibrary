@@ -32,12 +32,34 @@ public struct LoginView: View {
     }
     
   
-       private var firstName: String { fields[.firstName] ?? "" }
-    private var lastName: String { fields[.lastName] ?? "" }
-    private var email: String { fields[.email] ?? "" }
-      private var password: String { fields[.password] ?? "" }
-    private var companyName: String { fields[.companyName] ?? "" }
-    
+    // ✅ Bindings for specific fields
+        private var emailBinding: Binding<String> {
+            Binding(
+                get: { fields[.email] ?? "" },
+                set: { fields[.email] = $0 }
+            )
+        }
+
+        private var passwordBinding: Binding<String> {
+            Binding(
+                get: { fields[.password] ?? "" },
+                set: { fields[.password] = $0 }
+            )
+        }
+
+        private var firstNameBinding: Binding<String> {
+            Binding(
+                get: { fields[.firstName] ?? "" },
+                set: { fields[.firstName] = $0 }
+            )
+        }
+
+        private var lastNameBinding: Binding<String> {
+            Binding(
+                get: { fields[.lastName] ?? "" },
+                set: { fields[.lastName] = $0 }
+            )
+        }
 
 
     public var body: some View {
@@ -99,13 +121,16 @@ public struct LoginView: View {
     // MARK: - Actions
     private func handleAction() {
         loginStatusMessage = ""
+        print("🟢 Handle Action Called")
+            print("Email: \(fields[.email] ?? ""), Password: \(fields[.password] ?? ""), First Name: \(fields[.firstName] ?? ""), Last Name: \(fields[.lastName] ?? "")")
+
         // Call ViewModel logic to handle login or account creation
         loginViewModel.handleAction(
             isLoginMode: isLoginMode,
-            email: email,
-            password: password,
-            firstName: firstName,
-            lastName: lastName
+            email: fields[.email] ?? "",
+                       password: fields[.password] ?? "",
+                       firstName: fields[.firstName] ?? "",
+                       lastName: fields[.lastName] ?? ""
         ) { result in
             switch result {
             case .success:
