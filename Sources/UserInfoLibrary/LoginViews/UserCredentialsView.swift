@@ -60,7 +60,6 @@ public struct UserCredentialsView: View {
                         CustomTextField(
                             placeholder: field.rawValue,
                             text: binding,
-                            isSecure: .constant(false),
                             placeholderColor: UIColor.lightGray
                         )
                     }
