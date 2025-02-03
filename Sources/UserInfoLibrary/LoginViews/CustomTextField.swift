@@ -12,24 +12,20 @@ import UIKit
 public struct CustomTextField: UIViewRepresentable {
     public var placeholder: String
     public var text: Binding<String>
-    @Binding public var isSecure: Bool
     public var placeholderColor: UIColor
     
     public init(
           placeholder: String,
           text: Binding<String>,
-          isSecure: Binding<Bool>,
           placeholderColor: UIColor
       ) {
           self.placeholder = placeholder
           self.text = text
-          self._isSecure = isSecure
           self.placeholderColor = placeholderColor
       }
 
     public func makeUIView(context: Context) -> UITextField {
            let textField = UITextField(frame: .zero)
-           textField.isSecureTextEntry = isSecure
            textField.attributedPlaceholder = NSAttributedString(
                string: placeholder,
                attributes: [NSAttributedString.Key.foregroundColor: placeholderColor]
@@ -39,7 +35,12 @@ public struct CustomTextField: UIViewRepresentable {
             textField.textColor = UIColor(named: "TextFieldTextColor") ?? .label // Define this color in your asset catalog to adapt to dark mode
            textField.borderStyle = .roundedRect // Optional, for styling
            textField.autocapitalizationType = .none
-           textField.keyboardType = isSecure ? .default : .emailAddress
+        if placeholder == "Email" || placeholder == "Email Address" {
+            textField.keyboardType = .emailAddress
+        } else {
+            textField.keyboardType = .default
+        }
+           
         
         textField.textContentType = getTextContentType(for: placeholder)
         print(#function,placeholder, textField.textContentType ?? .flightNumber)
@@ -56,12 +57,15 @@ public struct CustomTextField: UIViewRepresentable {
 
     public func updateUIView(_ uiView: UITextField, context: Context) {
         uiView.text = text.wrappedValue
-        uiView.isSecureTextEntry = isSecure // Ensure this updates with the state
         uiView.attributedPlaceholder = NSAttributedString(
             string: placeholder,
             attributes: [NSAttributedString.Key.foregroundColor: placeholderColor]
         )
-        uiView.keyboardType = isSecure ? .default : .emailAddress // Adjust keyboard type if necessary
+        if placeholder == "Email" || placeholder == "Email Address" {
+            uiView.keyboardType = .emailAddress
+        } else {
+            uiView.keyboardType = .default
+        }
 
         // It's also a good idea to add or update other properties here if they should change with the state
         uiView.addTarget(context.coordinator, action: #selector(CustomTextFieldCoordinator.textFieldDidChange(_:)), for: .editingChanged)
