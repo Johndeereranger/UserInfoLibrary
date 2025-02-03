@@ -14,7 +14,7 @@ public struct LoginView: View {
     @State private var isLoginMode = false
     @State private var email = ""
     @State private var password = ""
-    @State private var firstName = ""
+   // @State private var firstName = ""
     @State private var lastName = ""
     @State private var hiddenPassword = true
     @Environment(\.colorScheme) var colorScheme
@@ -30,6 +30,10 @@ public struct LoginView: View {
         self.fieldOrder = fieldOrder
         _fields = State(initialValue: Dictionary(uniqueKeysWithValues: fieldOrder.map { ($0, "") }))
     }
+    
+  
+       private var firstName: String { fields[.firstName] ?? "" }
+     //  private var lastName: String { fields[.lastName] ?? "" }
 
     public var body: some View {
         NavigationView {
