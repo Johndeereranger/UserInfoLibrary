@@ -94,20 +94,17 @@ struct UserCredentialsViewOld: View {
                 CustomTextField(
                     placeholder: "First Name",
                     text: $firstName,
-                    isSecure: .constant(false),
                     placeholderColor: UIColor.lightGray
                 )
                 CustomTextField(
                     placeholder: "Last Name",
                     text: $lastName,
-                    isSecure: .constant(false),
                     placeholderColor: UIColor.lightGray
                 )
             }
             CustomTextField(
                 placeholder: "Email",
                 text: $email,
-                isSecure: .constant(false),
                 placeholderColor: UIColor.lightGray
             )
             SecureCustomTextField(
