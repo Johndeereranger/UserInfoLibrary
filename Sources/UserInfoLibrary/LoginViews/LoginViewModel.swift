@@ -127,11 +127,12 @@ public class LoginViewModel: ObservableObject {
         password: String,
         firstName: String? = nil,
         lastName: String? = nil,
+        companyName: String? = nil,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
         Task {
             do {
-                try await handleAction(isLoginMode: isLoginMode, email: email, password: password, firstName: firstName, lastName: lastName)
+                try await handleAction(isLoginMode: isLoginMode, email: email, password: password, firstName: firstName, lastName: lastName, companyName: companyName)
                 completion(.success(()))
             } catch {
                 completion(.failure(error))

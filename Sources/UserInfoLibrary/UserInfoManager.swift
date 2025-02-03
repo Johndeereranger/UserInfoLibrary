@@ -140,7 +140,7 @@ public final class UserInfoManager: @unchecked Sendable {
             "accessDates": [todayString]
         ]
         
-        if let companyName = companyName {
+        if let companyName = companyName, !companyName.isEmpty {
             userData["companyName"] = companyName
         }
         

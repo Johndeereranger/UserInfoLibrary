@@ -31,35 +31,39 @@ public struct LoginView: View {
         _fields = State(initialValue: Dictionary(uniqueKeysWithValues: fieldOrder.map { ($0, "") }))
     }
     
-  
-    // ✅ Bindings for specific fields
-        private var emailBinding: Binding<String> {
-            Binding(
-                get: { fields[.email] ?? "" },
-                set: { fields[.email] = $0 }
-            )
-        }
-
-        private var passwordBinding: Binding<String> {
-            Binding(
-                get: { fields[.password] ?? "" },
-                set: { fields[.password] = $0 }
-            )
-        }
-
-        private var firstNameBinding: Binding<String> {
-            Binding(
-                get: { fields[.firstName] ?? "" },
-                set: { fields[.firstName] = $0 }
-            )
-        }
-
-        private var lastNameBinding: Binding<String> {
-            Binding(
-                get: { fields[.lastName] ?? "" },
-                set: { fields[.lastName] = $0 }
-            )
-        }
+    private var emailBinding: Binding<String> {
+        Binding(
+            get: { fields[.email] ?? "" },
+            set: { fields[.email] = $0 }
+        )
+    }
+    
+    private var passwordBinding: Binding<String> {
+        Binding(
+            get: { fields[.password] ?? "" },
+            set: { fields[.password] = $0 }
+        )
+    }
+    
+    private var firstNameBinding: Binding<String> {
+        Binding(
+            get: { fields[.firstName] ?? "" },
+            set: { fields[.firstName] = $0 }
+        )
+    }
+    
+    private var lastNameBinding: Binding<String> {
+        Binding(
+            get: { fields[.lastName] ?? "" },
+            set: { fields[.lastName] = $0 }
+        )
+    }
+    private var companyNameBinding: Binding<String> {
+        Binding(
+            get: { fields[.companyName] ?? "" },
+            set: { fields[.companyName] = $0 }
+        )
+    }
 
 
     public var body: some View {
@@ -128,9 +132,9 @@ public struct LoginView: View {
         loginViewModel.handleAction(
             isLoginMode: isLoginMode,
             email: fields[.email] ?? "",
-                       password: fields[.password] ?? "",
-                       firstName: fields[.firstName] ?? "",
-                       lastName: fields[.lastName] ?? ""
+            password: fields[.password] ?? "",
+            firstName: fields[.firstName] ?? "",
+            lastName: fields[.lastName] ?? ""
         ) { result in
             switch result {
             case .success:
