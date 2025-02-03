@@ -15,7 +15,11 @@ public class AuthHelper {
     
     /// Returns the current authenticated user ID, or `nil` if the user is not signed in.
     public static var currentUserID: String? {
-        return Auth.auth().currentUser?.uid
+        guard let userID = Auth.auth().currentUser?.uid else {
+            print("⚠️ AuthHelper: currentUserID is nil - User is not authenticated.")
+            return nil
+        }
+        return userID
     }
     
     /// Checks if a user is currently authenticated.
