@@ -142,6 +142,9 @@ public final class UserInfoManager: @unchecked Sendable {
         
         if let companyName = companyName, !companyName.isEmpty {
             userData["companyName"] = companyName
+            print(#function, "Adding company Name: \(companyName)")
+        } else {
+            print(#function, "Failed company Name: \(companyName)")
         }
         
         Firestore.firestore().collection("users").document(uid).setData(userData) { error in
