@@ -142,7 +142,7 @@ public struct LoginView: View {
     }
     
     private func handlePasswordReset() {
-        loginViewModel.resetPassword(email: email) { error in
+        loginViewModel.resetPassword(email: fields[.email] ?? "") { error in
             if let error = error {
                 loginStatusMessage = error.localizedDescription
             } else {
