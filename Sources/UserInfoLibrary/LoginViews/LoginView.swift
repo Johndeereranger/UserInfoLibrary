@@ -12,10 +12,10 @@ public struct LoginView: View {
     
     @StateObject private var loginViewModel = LoginViewModel.instance
     @State private var isLoginMode = false
-    @State private var email = ""
-    @State private var password = ""
+    //@State private var email = ""
+    //@State private var password = ""
    // @State private var firstName = ""
-    @State private var lastName = ""
+   // @State private var lastName = ""
     @State private var hiddenPassword = true
     @Environment(\.colorScheme) var colorScheme
     @State private var shouldShowImagePicker = false
@@ -33,7 +33,12 @@ public struct LoginView: View {
     
   
        private var firstName: String { fields[.firstName] ?? "" }
-     //  private var lastName: String { fields[.lastName] ?? "" }
+    private var lastName: String { fields[.lastName] ?? "" }
+    private var email: String { fields[.email] ?? "" }
+      private var password: String { fields[.password] ?? "" }
+    private var companyName: String { fields[.companyName] ?? "" }
+    
+
 
     public var body: some View {
         NavigationView {
