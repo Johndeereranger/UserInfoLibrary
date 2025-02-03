@@ -126,7 +126,7 @@ public struct LoginView: View {
     private func handleAction() {
         loginStatusMessage = ""
         print("🟢 Handle Action Called")
-            print("Email: \(fields[.email] ?? ""), Password: \(fields[.password] ?? ""), First Name: \(fields[.firstName] ?? ""), Last Name: \(fields[.lastName] ?? "")")
+            print("Email: \(fields[.email] ?? ""),, First Name: \(fields[.firstName] ?? ""), Last Name: \(fields[.lastName] ?? ""), Company Name: \(fields[.companyName] ?? "")")
 
         // Call ViewModel logic to handle login or account creation
         loginViewModel.handleAction(
