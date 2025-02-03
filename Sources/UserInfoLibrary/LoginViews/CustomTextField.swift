@@ -42,6 +42,7 @@ public struct CustomTextField: UIViewRepresentable {
            textField.keyboardType = isSecure ? .default : .emailAddress
         
         textField.textContentType = getTextContentType(for: placeholder)
+        print(#function,placeholder, textField.textContentType ?? .flightNumber)
            
            textField.setContentHuggingPriority(.defaultHigh, for: .vertical)
            return textField
