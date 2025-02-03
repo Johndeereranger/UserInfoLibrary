@@ -40,6 +40,8 @@ public struct CustomTextField: UIViewRepresentable {
            textField.borderStyle = .roundedRect // Optional, for styling
            textField.autocapitalizationType = .none
            textField.keyboardType = isSecure ? .default : .emailAddress
+        
+        textField.textContentType = getTextContentType(for: placeholder)
            
            textField.setContentHuggingPriority(.defaultHigh, for: .vertical)
            return textField
@@ -84,5 +86,23 @@ public struct CustomTextField: UIViewRepresentable {
     public func makeCoordinator() -> CustomTextFieldCoordinator {
         return CustomTextFieldCoordinator(text: text)
     }
+    
+    private func getTextContentType(for placeholder: String) -> UITextContentType? {
+        switch placeholder.lowercased() {
+        case "first name":
+            return .givenName // Suggests the user's first name
+        case "last name":
+            return .familyName // Suggests the user's last name
+        case "email", "email address":
+            return .emailAddress // Suggests stored email
+        case "phone number":
+            return .telephoneNumber // Suggests stored phone number
+        case "company name":
+            return .organizationName // Suggests stored company name
+        default:
+            return nil // No specific suggestion
+        }
+    }
+
 }
 
