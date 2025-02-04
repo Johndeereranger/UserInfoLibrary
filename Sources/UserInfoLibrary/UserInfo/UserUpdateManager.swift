@@ -41,6 +41,16 @@ public final class UserUpdateManager: @unchecked Sendable {
         guard let userId = AuthHelper.currentUserID else { return }
         db.collection("users").document(userId).updateData(["companyName": companyName])
     }
+    
+    @MainActor public func updateFCMToken(_ fcmToken: String) {
+        guard let userId = AuthHelper.currentUserID else { return }
+        let userDoc = db.collection("users").document(userId)
+        userDoc.updateData(["fcmToken": fcmToken]) { error in
+               if let error = error {
+                   print(#function,"Error updating token: \(error.localizedDescription)")
+               }
+           }
+    }
 
     
     
