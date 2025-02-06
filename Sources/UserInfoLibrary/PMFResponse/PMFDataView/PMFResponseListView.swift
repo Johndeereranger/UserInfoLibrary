@@ -55,6 +55,7 @@ public struct PMFResponseListView: View {
                             .swipeActions {
                                 Button(role: .destructive) {
                                     Task {
+                                        print("🛑 Attempting to delete session: \(response.sessionID)")
                                         await viewModel.deleteResponse(sessionID: response.sessionID)
                                     }
                                 } label: {
