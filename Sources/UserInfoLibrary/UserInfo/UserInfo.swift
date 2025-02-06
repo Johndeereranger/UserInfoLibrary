@@ -50,6 +50,7 @@ public struct UserInfo: Sendable, Codable {
      public var declinedRisk: [String]?
      public var waterfallsVisited: [String]?
      public var idfa: String?
+  
 
     public var pmfResponses: [PMFResponse]?
     // Metadata fields

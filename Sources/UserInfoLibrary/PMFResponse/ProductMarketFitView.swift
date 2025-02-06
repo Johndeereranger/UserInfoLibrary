@@ -13,7 +13,9 @@ public struct ProductMarketFitView: View {
     let imageName: String
     
     var appName: String {
-        return Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "App"
+        return Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ??
+               Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ??
+               "App"
     }
     
     public init(imageName: String, onYesTapped: @escaping () -> Void, onNoTapped: @escaping () -> Void) {
