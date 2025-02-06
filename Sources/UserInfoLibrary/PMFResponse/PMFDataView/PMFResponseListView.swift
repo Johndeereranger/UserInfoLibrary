@@ -8,10 +8,10 @@
 import SwiftUI
 import SwiftUI
 
-struct PMFResponseListView: View {
-    @StateObject var viewModel = PMFResponseListViewModel()
+public struct PMFResponseListView: View {
+    @StateObject private var viewModel = PMFResponseListViewModel()
 
-    var body: some View {
+   public var body: some View {
         NavigationView {
             Group {
                 if viewModel.isLoading {
