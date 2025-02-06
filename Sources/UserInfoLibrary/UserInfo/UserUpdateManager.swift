@@ -52,6 +52,10 @@ public final class UserUpdateManager: @unchecked Sendable {
            }
     }
 
+    @MainActor public func setIsPushNoticationEnabled(isEnabled: Bool) {
+        guard let userId = AuthHelper.currentUserID else { return }
+        db.collection("users").document(userId).updateData(["isPushNotificationEnabled": isEnabled])
+    }
     
     
     //MARK: - NC Waterfalls updates

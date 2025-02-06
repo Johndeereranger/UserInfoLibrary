@@ -39,6 +39,7 @@ public struct UserInfo: Sendable, Codable {
     public var isActive: Bool?
     public var isAdmin: Bool?
     public var companyName: String?
+    public var isPushNotificationEnabled: Bool?
     
     //NC Waterfalls
     public var userIDCreateDate: String?
@@ -82,6 +83,9 @@ public struct UserInfo: Sendable, Codable {
         isActive: Bool? = nil,
         isAdmin: Bool? = nil,
         companyName: String? = nil,
+        isPushNotificationEnabled: Bool? = nil,
+        
+        
         metadata: [String: MetadataValue]? = nil
         
     ) {
@@ -104,6 +108,7 @@ public struct UserInfo: Sendable, Codable {
         self.metadata = metadata
         self.companyName = companyName
         self.isAdmin = isAdmin
+        self.isPushNotificationEnabled = isPushNotificationEnabled
     }
     
     
@@ -139,6 +144,7 @@ public struct UserInfo: Sendable, Codable {
         self.isActive = data["isActive"] as? Bool
         self.isAdmin = data["isAdmin"] as? Bool
         self.companyName = data["companyName"] as? String
+        self.isPushNotificationEnabled = data["isPushNotificationEnabled"] as? Bool
         
         self.userIDCreateDate = data["userIDCreateDate"] as? String
           self.systemVersion = data["systemVersion"] as? String
