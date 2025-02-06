@@ -10,7 +10,7 @@ import SwiftUI
 
 public struct PMFResponseListView: View {
     @StateObject private var viewModel = PMFResponseListViewModel()
-
+    public init() {}
    public var body: some View {
         NavigationView {
             Group {
