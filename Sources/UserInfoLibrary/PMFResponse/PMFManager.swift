@@ -218,6 +218,7 @@ public class PMFManager {
                 existingResponses[index] = existingResponse
             } else {
                 let newResponse: [String: Any] = [
+                    "userID": uid,
                     "sessionID": self.sessionID,
                     "feedback": feedback ?? "",
                     "mainBenefit": mainBenefit ?? "",

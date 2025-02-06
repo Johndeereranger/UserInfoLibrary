@@ -26,6 +26,9 @@ public struct PMFResponseListView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Session ID: \(response.sessionID)")
                                     .font(.headline)
+                                
+                                Text("UserID: \(response.userID)")
+                                    .font(.subheadline)
 
                                 if let feedback = response.feedback {
                                     Text("Feedback: \(feedback)")

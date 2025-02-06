@@ -10,7 +10,7 @@ import Firebase
 
 public struct PMFResponse: Codable, Sendable {
     public let sessionID: String
-    public let userID: String?
+    public let userID: String
     public let feedback: String?
     public let mainBenefit: String?
     public let improvementSuggestions: String?
@@ -20,7 +20,7 @@ public struct PMFResponse: Codable, Sendable {
 
     public init(
         sessionID: String,
-        userID: String? = nil,
+        userID: String,
         feedback: String? = nil,
         mainBenefit: String? = nil,
         improvementSuggestions: String? = nil,
@@ -57,7 +57,7 @@ public struct PMFResponse: Codable, Sendable {
 //        self.accessDateCount = dictionary["accessDateCount"] as? Int
 //        self.usageCountAtSurvey = dictionary["usageCountAtSurvey"] as? Int
 //    }
-    public init?(from dictionary: [String: Any], userIDFromDoc: String) {
+    public init?(from dictionary: [String: Any]) {
         guard let sessionID = dictionary["sessionID"] as? String else { return nil }
 
         // Handle both Firestore's Timestamp & standard Date storage
@@ -70,7 +70,7 @@ public struct PMFResponse: Codable, Sendable {
         }
 
         self.sessionID = sessionID
-        self.userID = dictionary["userID"] as? String ?? userIDFromDoc // ✅ Fallback if missing
+        self.userID = dictionary["userID"] as? String ?? "NO ID" // ✅ Fallback if missing
         self.feedback = dictionary["feedback"] as? String
         self.mainBenefit = dictionary["mainBenefit"] as? String
         self.improvementSuggestions = dictionary["improvementSuggestions"] as? String
@@ -81,6 +81,7 @@ public struct PMFResponse: Codable, Sendable {
     public func dictionaryRepresentation() -> [String: Any] {
         var dict: [String: Any] = [:]
         dict["sessionID"] = sessionID
+        dict["userID"] = userID
         dict["feedback"] = feedback
         dict["mainBenefit"] = mainBenefit
         dict["improvementSuggestions"] = improvementSuggestions
