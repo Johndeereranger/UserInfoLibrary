@@ -115,9 +115,6 @@ public struct UserInfo: Sendable, Codable {
     // Initializer from Firestore DocumentSnapshot
     public init?(document: DocumentSnapshot) {
         guard let data = document.data() else { return nil }
-
-       
-        
         guard let extractedDocumentID = extractDocumentID(from: document) else {
                   print("Failed to extract documentID")
                   return nil
@@ -147,35 +144,36 @@ public struct UserInfo: Sendable, Codable {
         self.isPushNotificationEnabled = data["isPushNotificationEnabled"] as? Bool
         
         self.userIDCreateDate = data["userIDCreateDate"] as? String
-          self.systemVersion = data["systemVersion"] as? String
-          self.purchased = data["purchased"] as? Bool
-          self.purchasedDate = data["purchasedDate"] as? String
-          self.approvedRisk = data["approvedRisk"] as? [String]
-          self.declinedRisk = data["declinedRisk"] as? [String]
-          self.waterfallsVisited = data["WaterfallsVisited"] as? [String]
-          self.idfa = data["idfa"] as? String
+        self.systemVersion = data["systemVersion"] as? String
+        self.purchased = data["purchased"] as? Bool
+        self.purchasedDate = data["purchasedDate"] as? String
+        self.approvedRisk = data["approvedRisk"] as? [String]
+        self.declinedRisk = data["declinedRisk"] as? [String]
+        self.waterfallsVisited = data["WaterfallsVisited"] as? [String]
+        self.idfa = data["idfa"] as? String
         
         // Decode `pmfResponses` safely
-          if let pmfData = data["pmfResponses"] as? [[String: Any]] {
-              self.pmfResponses = pmfData.compactMap { dict in
-                  guard let sessionID = dict["sessionID"] as? String,
-                        let answeredAtTimestamp = dict["answeredAt"] as? Timestamp else {
-                      return nil
-                  }
-                  return PMFResponse(
-                      sessionID: sessionID,
-                      feedback: dict["feedback"] as? String,
-                      mainBenefit: dict["mainBenefit"] as? String,
-                      improvementSuggestions: dict["improvementSuggestions"] as? String,
-                      answeredAt: answeredAtTimestamp.dateValue(),
-                      usageCountAtSurvey: dict["usageCountAtSurvey"] as? Int
-                      
-                  )
-              }
-          } else {
-              self.pmfResponses = nil
-          }
-
+        if let pmfData = data["pmfResponses"] as? [[String: Any]] {
+            self.pmfResponses = pmfData.compactMap { dict in
+                guard let sessionID = dict["sessionID"] as? String,
+                      let answeredAtTimestamp = dict["answeredAt"] as? Timestamp else {
+                    return nil
+                }
+                return PMFResponse(
+                    sessionID: sessionID,
+                    userID: dict["userID"] as? String ?? extractedDocumentID,
+                    feedback: dict["feedback"] as? String,
+                    mainBenefit: dict["mainBenefit"] as? String,
+                    improvementSuggestions: dict["improvementSuggestions"] as? String,
+                    answeredAt: answeredAtTimestamp.dateValue(),
+                    usageCountAtSurvey: dict["usageCountAtSurvey"] as? Int
+                    
+                )
+            }
+        } else {
+            self.pmfResponses = nil
+        }
+        
         // Parse metadata
         var metadata: [String: MetadataValue] = [:]
         for (key, value) in data {

@@ -38,25 +38,6 @@ public struct PMFResponse: Codable, Sendable {
         self.usageCountAtSurvey = usageCountAtSurvey
     }
 
-//    public init?(from dictionary: [String: Any]) {
-//        guard let sessionID = dictionary["sessionID"] as? String else { return nil }
-//
-//        // Handle both Firestore's Timestamp & standard Date storage
-//        if let timestamp = dictionary["answeredAt"] as? Double {
-//            self.answeredAt = Date(timeIntervalSince1970: timestamp)
-//        } else if let firestoreTimestamp = dictionary["answeredAt"] as? Timestamp {
-//            self.answeredAt = firestoreTimestamp.dateValue()
-//        } else {
-//            return nil // Invalid date format
-//        }
-//
-//        self.sessionID = sessionID
-//        self.feedback = dictionary["feedback"] as? String
-//        self.mainBenefit = dictionary["mainBenefit"] as? String
-//        self.improvementSuggestions = dictionary["improvementSuggestions"] as? String
-//        self.accessDateCount = dictionary["accessDateCount"] as? Int
-//        self.usageCountAtSurvey = dictionary["usageCountAtSurvey"] as? Int
-//    }
     public init?(from dictionary: [String: Any]) {
         guard let sessionID = dictionary["sessionID"] as? String else { return nil }
 
