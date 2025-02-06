@@ -8,8 +8,9 @@
 import UserNotifications
 import UIKit
 
+@MainActor
 public class NotificationPermissionManager {
-   
+    public static let shared = NotificationPermissionManager()
 
     private init() {}
 

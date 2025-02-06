@@ -131,5 +131,23 @@ public actor PMFDataManager {
             return []
         }
     }
+    
+    public func deletePMFResponse(userID: String, sessionID: String) async {
+        let userDocRef = firestore.collection(usersCollection).document(userID)
+
+        do {
+            let document = try await userDocRef.getDocument()
+            guard var responses = document.data()?[pmfResponsesKey] as? [[String: Any]] else { return }
+
+            // Remove response with matching sessionID
+            responses.removeAll { $0["sessionID"] as? String == sessionID }
+
+            // Update Firestore
+            try await userDocRef.updateData([pmfResponsesKey: responses])
+            print("Successfully deleted PMF response for session: \(sessionID)")
+        } catch {
+            print("Error deleting PMF response: \(error.localizedDescription)")
+        }
+    }
 }
 
