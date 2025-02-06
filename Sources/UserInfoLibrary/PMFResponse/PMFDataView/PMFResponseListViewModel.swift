@@ -9,11 +9,11 @@ import Foundation
 
 
 @MainActor
-class PMFResponseListViewModel: ObservableObject {
-    @Published var responses: [PMFResponse] = []
-    @Published var isLoading = true
+public class PMFResponseListViewModel: ObservableObject {
+    @Published public var responses: [PMFResponse] = []
+    @Published public var isLoading = true
 
-    func fetchResponses() async {
+    public func fetchResponses() async {
         isLoading = true
         let fetchedResponses = await PMFDataManager.shared.fetchAllPMFData()
         DispatchQueue.main.async {
@@ -22,7 +22,7 @@ class PMFResponseListViewModel: ObservableObject {
         }
     }
 
-    func deleteResponse(sessionID: String) async {
+    public func deleteResponse(sessionID: String) async {
         guard let userID = PMFConfigurationProvider.userID else { return }
         await PMFDataManager.shared.deletePMFResponse(userID: userID, sessionID: sessionID)
 
