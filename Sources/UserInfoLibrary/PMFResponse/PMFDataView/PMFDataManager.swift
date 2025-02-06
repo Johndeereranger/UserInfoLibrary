@@ -137,19 +137,28 @@ public actor PMFDataManager {
 
         do {
             let document = try await userDocRef.getDocument()
-            guard var responses = document.data()?[pmfResponsesKey] as? [[String: Any]] else { return }
-
-            // Remove response with matching sessionID
-            //responses.removeAll { $0["sessionID"] as? String == sessionID }
+            
+            guard var responses = document.data()?[pmfResponsesKey] as? [[String: Any]] else {
+                print("No PMF responses found for user: \(userID)")
+                return
+            }
+            
+            print("Existing PMF responses before deletion: \(responses)")
+            
             responses.removeAll { response in
                 let existingSessionID = response["sessionID"] as? String
                 let shouldRemove = existingSessionID == sessionID
                 print("Checking: \(existingSessionID ?? "nil") against \(sessionID) -> \(shouldRemove)")
                 return shouldRemove
             }
-            // Update Firestore
-            try await userDocRef.updateData([pmfResponsesKey: responses])
+            
+            print("Remaining PMF responses after deletion: \(responses)")
+
+            // 🔥 Use setData with merge to force update
+            try await userDocRef.setData([pmfResponsesKey: responses], merge: true)
+
             print("Successfully deleted PMF response for session: \(sessionID)")
+
         } catch {
             print("Error deleting PMF response: \(error.localizedDescription)")
         }
