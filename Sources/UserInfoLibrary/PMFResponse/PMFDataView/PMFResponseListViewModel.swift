@@ -24,7 +24,7 @@ public class PMFResponseListViewModel: ObservableObject {
 
     public func deleteResponse(sessionID: String) async {
         guard let userID = PMFConfigurationProvider.userID else { return }
-        await PMFDataManager.shared.deletePMFResponse(userID: userID, sessionID: sessionID)
+        await PMFDataManager.shared.deletePMFResponse(sessionID: sessionID)
 
         // Update UI after deletion
         await fetchResponses()
