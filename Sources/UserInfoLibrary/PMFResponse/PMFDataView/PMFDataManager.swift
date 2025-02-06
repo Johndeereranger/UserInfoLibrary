@@ -136,31 +136,46 @@ public actor PMFDataManager {
         let userDocRef = firestore.collection(usersCollection).document(userID)
 
         do {
-            let document = try await userDocRef.getDocument()
-            
+            // 🔥 Force Firestore to fetch fresh data
+            let document = try await userDocRef.getDocument(source: .server)
+
+            // 🔍 Validate if pmfResponses exists
             guard var responses = document.data()?[pmfResponsesKey] as? [[String: Any]] else {
-                print("No PMF responses found for user: \(userID)")
+                print("❌ No PMF responses found for user: \(userID)")
                 return
             }
-            
-            print("Existing PMF responses before deletion: \(responses)")
-            
+
+            print("📋 Existing PMF responses before deletion: \(responses.count)")
+
+            // 🔍 Print all session IDs before filtering
+            for response in responses {
+                print("✅ Found Session ID: \(response["sessionID"] ?? "Unknown")")
+            }
+
+            // 🔥 Ensure correct session ID removal
+            let originalCount = responses.count
             responses.removeAll { response in
                 let existingSessionID = response["sessionID"] as? String
                 let shouldRemove = existingSessionID == sessionID
-                print("Checking: \(existingSessionID ?? "nil") against \(sessionID) -> \(shouldRemove)")
+                print("🔍 Checking: \(existingSessionID ?? "nil") against \(sessionID) -> \(shouldRemove)")
                 return shouldRemove
             }
-            
-            print("Remaining PMF responses after deletion: \(responses)")
 
-            // 🔥 Use setData with merge to force update
+            print("📌 Remaining PMF responses after deletion: \(responses.count)")
+
+            // 🛑 Validate if deletion actually removed an item
+            if responses.count == originalCount {
+                print("⚠️ No response was removed! Session ID might not be matching.")
+                return
+            }
+
+            // 🔥 Use setData() with merge to ensure update is applied
             try await userDocRef.setData([pmfResponsesKey: responses], merge: true)
 
-            print("Successfully deleted PMF response for session: \(sessionID)")
+            print("✅ Successfully deleted PMF response for session: \(sessionID)")
 
         } catch {
-            print("Error deleting PMF response: \(error.localizedDescription)")
+            print("❌ Error deleting PMF response: \(error.localizedDescription)")
         }
     }
 }
