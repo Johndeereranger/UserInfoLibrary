@@ -132,47 +132,55 @@ public actor PMFDataManager {
         }
     }
     
-    public func deletePMFResponse(userID: String, sessionID: String) async {
-        let userDocRef = firestore.collection(usersCollection).document(userID)
+    public func deletePMFResponse(sessionID: String) async {
+        let usersCollectionRef = firestore.collection(usersCollection)
 
         do {
-            // 🔥 Force Firestore to fetch fresh data
-            let document = try await userDocRef.getDocument(source: .server)
+            // 🔥 Step 1: Find the user document that contains this session ID
+            let snapshot = try await usersCollectionRef.getDocuments(source: .server)
+            
+            var userIDToUpdate: String?
+            var responsesToUpdate: [[String: Any]] = []
 
-            // 🔍 Validate if pmfResponses exists
-            guard var responses = document.data()?[pmfResponsesKey] as? [[String: Any]] else {
-                print("❌ No PMF responses found for user: \(userID)")
+            print("🔍 Searching for sessionID: \(sessionID) across all users...")
+
+            for document in snapshot.documents {
+                let userID = document.documentID
+                guard let responses = document.data()[pmfResponsesKey] as? [[String: Any]] else { continue }
+
+                // Check if any response in this user doc matches the session ID
+                if responses.contains(where: { ($0["sessionID"] as? String) == sessionID }) {
+                    userIDToUpdate = userID
+                    responsesToUpdate = responses
+                    break
+                }
+            }
+
+            guard let userID = userIDToUpdate else {
+                print("❌ No matching session ID found across users.")
                 return
             }
 
-            print("📋 Existing PMF responses before deletion: \(responses.count)")
+            print("✅ Found sessionID: \(sessionID) in user document: \(userID)")
 
-            // 🔍 Print all session IDs before filtering
-            for response in responses {
-                print("✅ Found Session ID: \(response["sessionID"] ?? "Unknown")")
-            }
+            // 🔥 Step 2: Remove the session from the found user's PMF responses
+            let userDocRef = usersCollectionRef.document(userID)
+            let originalCount = responsesToUpdate.count
 
-            // 🔥 Ensure correct session ID removal
-            let originalCount = responses.count
-            responses.removeAll { response in
-                let existingSessionID = response["sessionID"] as? String
-                let shouldRemove = existingSessionID == sessionID
-                print("🔍 Checking: \(existingSessionID ?? "nil") against \(sessionID) -> \(shouldRemove)")
-                return shouldRemove
-            }
+            responsesToUpdate.removeAll { ($0["sessionID"] as? String) == sessionID }
 
-            print("📌 Remaining PMF responses after deletion: \(responses.count)")
+            print("📌 After deletion, remaining PMF responses: \(responsesToUpdate.count)")
 
-            // 🛑 Validate if deletion actually removed an item
-            if responses.count == originalCount {
-                print("⚠️ No response was removed! Session ID might not be matching.")
+            // 🛑 If nothing was removed, log an error
+            if responsesToUpdate.count == originalCount {
+                print("⚠️ No response was removed! Possible data inconsistency.")
                 return
             }
 
-            // 🔥 Use setData() with merge to ensure update is applied
-            try await userDocRef.setData([pmfResponsesKey: responses], merge: true)
+            // 🔥 Step 3: Update Firestore with the modified responses
+            try await userDocRef.setData([pmfResponsesKey: responsesToUpdate], merge: true)
 
-            print("✅ Successfully deleted PMF response for session: \(sessionID)")
+            print("✅ Successfully deleted PMF response for session: \(sessionID) from user: \(userID)")
 
         } catch {
             print("❌ Error deleting PMF response: \(error.localizedDescription)")

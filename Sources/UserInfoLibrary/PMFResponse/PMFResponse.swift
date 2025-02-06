@@ -10,6 +10,7 @@ import Firebase
 
 public struct PMFResponse: Codable, Sendable {
     public let sessionID: String
+    public let userID: String?
     public let feedback: String?
     public let mainBenefit: String?
     public let improvementSuggestions: String?
@@ -19,6 +20,7 @@ public struct PMFResponse: Codable, Sendable {
 
     public init(
         sessionID: String,
+        userID: String? = nil,
         feedback: String? = nil,
         mainBenefit: String? = nil,
         improvementSuggestions: String? = nil,
@@ -27,6 +29,7 @@ public struct PMFResponse: Codable, Sendable {
         usageCountAtSurvey: Int? = nil
     ) {
         self.sessionID = sessionID
+        self.userID = userID
         self.feedback = feedback
         self.mainBenefit = mainBenefit
         self.improvementSuggestions = improvementSuggestions
@@ -48,6 +51,26 @@ public struct PMFResponse: Codable, Sendable {
         }
 
         self.sessionID = sessionID
+        self.feedback = dictionary["feedback"] as? String
+        self.mainBenefit = dictionary["mainBenefit"] as? String
+        self.improvementSuggestions = dictionary["improvementSuggestions"] as? String
+        self.accessDateCount = dictionary["accessDateCount"] as? Int
+        self.usageCountAtSurvey = dictionary["usageCountAtSurvey"] as? Int
+    }
+    public init?(from dictionary: [String: Any], userIDFromDoc: String) {
+        guard let sessionID = dictionary["sessionID"] as? String else { return nil }
+
+        // Handle both Firestore's Timestamp & standard Date storage
+        if let timestamp = dictionary["answeredAt"] as? Double {
+            self.answeredAt = Date(timeIntervalSince1970: timestamp)
+        } else if let firestoreTimestamp = dictionary["answeredAt"] as? Timestamp {
+            self.answeredAt = firestoreTimestamp.dateValue()
+        } else {
+            return nil // Invalid date format
+        }
+
+        self.sessionID = sessionID
+        self.userID = dictionary["userID"] as? String ?? userIDFromDoc // ✅ Fallback if missing
         self.feedback = dictionary["feedback"] as? String
         self.mainBenefit = dictionary["mainBenefit"] as? String
         self.improvementSuggestions = dictionary["improvementSuggestions"] as? String
