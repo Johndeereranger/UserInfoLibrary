@@ -140,8 +140,13 @@ public actor PMFDataManager {
             guard var responses = document.data()?[pmfResponsesKey] as? [[String: Any]] else { return }
 
             // Remove response with matching sessionID
-            responses.removeAll { $0["sessionID"] as? String == sessionID }
-
+            //responses.removeAll { $0["sessionID"] as? String == sessionID }
+            responses.removeAll { response in
+                let existingSessionID = response["sessionID"] as? String
+                let shouldRemove = existingSessionID == sessionID
+                print("Checking: \(existingSessionID ?? "nil") against \(sessionID) -> \(shouldRemove)")
+                return shouldRemove
+            }
             // Update Firestore
             try await userDocRef.updateData([pmfResponsesKey: responses])
             print("Successfully deleted PMF response for session: \(sessionID)")
