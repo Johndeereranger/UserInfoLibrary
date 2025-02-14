@@ -21,6 +21,7 @@ import Foundation
 //}
 
 import FirebaseCore
+import FirebaseAuth
 //import FirebaseFirestore
 
 public class FirebaseManager: @unchecked Sendable {
@@ -153,6 +154,39 @@ public final class UserInfoManager: @unchecked Sendable {
             }
         }
         
+    }
+    
+    public func deleteUserAccount(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated."])))
+            return
+        }
+
+        // Delete Firestore user document
+        db.collection("users").document(userId).delete { error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            // Delete Firebase Auth account
+            user.delete { authError in
+                if let authError = authError {
+                    completion(.failure(authError))
+                } else {
+                    completion(.success(()))
+                }
+            }
+        }
+    }
+
+    public func deleteUserAccount(userId: String) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated."])
+        }
+
+        try await db.collection("users").document(userId).delete()
+        try await user.delete()
     }
     
 }
