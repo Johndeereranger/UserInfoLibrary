@@ -34,7 +34,7 @@ public class MarketingDashboardViewModel: ObservableObject {
         let filteredUsers = filterUsersByDateRange(users: userInfos, filter: selectedFilter)
 
         metrics.newSignups = filteredUsers.count
-        metrics.userGrowthRate = calculateUserGrowthRate(users: userInfos)
+        metrics.userGrowthRate = calculateUserGrowthRate(users: userInfos, filter: selectedFilter)
         metrics.averageAccessFrequency = calculateAverageAccessFrequency(users: filteredUsers)
         metrics.userRetentionRate = calculateRetentionRate(users: filteredUsers)
     }
@@ -45,13 +45,13 @@ public class MarketingDashboardViewModel: ObservableObject {
         print("Current Date, \(now)")
         switch filter {
         case .last7Days:
-            let cutoffDate = calendar.date(byAdding: .day, value: -100, to: now) ?? now
+            let cutoffDate = calendar.date(byAdding: .day, value: -7, to: now) ?? now
             return users.filter { user in
                 guard let signUpDate = user.signUpDate?.toDate() else {
-                    print("Failed to convert signUpDate to Date")
+                    //print("Failed to convert signUpDate to Date")
                     return false }
                 let isIncluded = signUpDate >= cutoffDate
-                print("Signup date: \(signUpDate), isIncluded: \(isIncluded)")
+                //print("Signup date: \(signUpDate), isIncluded: \(isIncluded)")
                 return isIncluded
             
             }
@@ -97,27 +97,58 @@ public class MarketingDashboardViewModel: ObservableObject {
     }
 
 
-    private func calculateUserGrowthRate(users: [UserInfo]) -> Double {
+    private func calculateUserGrowthRate(users: [UserInfo], filter: DateRangeFilter) -> Double {
         let calendar = Calendar.current
-        let currentMonthUsers = users.filter { user in
+        let now = Date()
+        
+        let (currentRangeStart, previousRangeStart) = getDateRangeForComparison(filter: filter, now: now, calendar: calendar)
+        
+        let currentPeriodUsers = users.filter { user in
             guard let date = user.signUpDate?.toDate() else { return false }
-            return calendar.isDate(date, equalTo: Date(), toGranularity: .month)
+            return date >= currentRangeStart
         }
-        let previousMonthUsers = users.filter { user in
+        
+        let previousPeriodUsers = users.filter { user in
             guard let date = user.signUpDate?.toDate() else { return false }
-            let lastMonth = calendar.date(byAdding: .month, value: -1, to: Date()) ?? Date()
-            return calendar.isDate(date, equalTo: lastMonth, toGranularity: .month)
+            return date >= previousRangeStart && date < currentRangeStart
         }
 
-        let previousCount = Double(previousMonthUsers.count)
-        let currentCount = Double(currentMonthUsers.count)
+        let previousCount = Double(previousPeriodUsers.count)
+        let currentCount = Double(currentPeriodUsers.count)
 
         if previousCount == 0 {
-            return currentCount > 0 ? 100.0 : 0.0 // If new users exist but no previous users, show 100% growth
+            return currentCount > 0 ? 100.0 : 0.0
         }
 
         return ((currentCount - previousCount) / previousCount) * 100
     }
+
+    private func getDateRangeForComparison(filter: DateRangeFilter, now: Date, calendar: Calendar) -> (Date, Date) {
+        switch filter {
+        case .last7Days:
+            let currentStart = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+            let previousStart = calendar.date(byAdding: .day, value: -14, to: now) ?? now
+            return (currentStart, previousStart)
+
+        case .last30Days:
+            let currentStart = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+            let previousStart = calendar.date(byAdding: .day, value: -60, to: now) ?? now
+            return (currentStart, previousStart)
+
+        case .yearOverYear:
+            let currentStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
+            let previousStart = calendar.date(byAdding: .year, value: -1, to: currentStart) ?? now
+            return (currentStart, previousStart)
+
+    
+        case .custom(let startDate, let endDate):
+            let daysBetween = Int(endDate.timeIntervalSince(startDate) / 86400) // Convert Double to Int
+            let previousStart = calendar.date(byAdding: .day, value: -daysBetween, to: startDate) ?? startDate
+            return (startDate, previousStart)
+
+        }
+    }
+
 
 
     private func calculateAverageAccessFrequency(users: [UserInfo]) -> Double {
@@ -132,7 +163,42 @@ public class MarketingDashboardViewModel: ObservableObject {
         let retainedUsers = users.filter { $0.accessDates?.count ?? 0 > 1 }
         return (Double(retainedUsers.count) / Double(users.count)) * 100
     }
+    
+    public func getMetricData(for metric: MetricType) -> [Date: Int] {
+        let calendar = Calendar.current
+        var metricData: [Date: Int] = [:]
 
+        for user in userInfos {
+            guard let date = user.signUpDate?.toDate() else { continue }
+            let startOfDay = calendar.startOfDay(for: date)
+            metricData[startOfDay, default: 0] += 1
+        }
+
+        return metricData
+    }
+    
+    public func getMetricValue(for metric: MetricType) -> String {
+        switch metric {
+        case .newSignups: return "\(metrics.newSignups)"
+        case .retentionRate: return "\(String(format: "%.1f", metrics.userRetentionRate))%"
+        case .accessFrequency: return "\(String(format: "%.2f", metrics.averageAccessFrequency))"
+        case .growthRate: return "\(String(format: "%.1f", metrics.userGrowthRate))%"
+        }
+    }
+
+}
+
+public enum MetricType: CaseIterable {
+    case newSignups, retentionRate, accessFrequency, growthRate
+
+    var title: String {
+        switch self {
+        case .newSignups: return "New Signups"
+        case .retentionRate: return "Retention Rate"
+        case .accessFrequency: return "Avg Access Frequency"
+        case .growthRate: return "User Growth Rate"
+        }
+    }
 }
 
 public enum DateRangeFilter: Hashable, Equatable {

@@ -9,7 +9,7 @@ import SwiftUI
 
 public struct MarketingDashboardView: View {
     @StateObject private var viewModel = MarketingDashboardViewModel()
-
+    @State private var selectedMetric: MetricType?
     public init() {}
 
     public var body: some View {
@@ -23,7 +23,9 @@ public struct MarketingDashboardView: View {
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
                 
-                MetricsGridView(metrics: viewModel.metrics)
+                MetricsGridView(metrics: viewModel.metrics) { metric in
+                    selectedMetric = metric
+                }
                 
                 Spacer()
             }
@@ -37,21 +39,34 @@ public struct MarketingDashboardView: View {
 
 public struct MetricsGridView: View {
     public let metrics: DashboardMetrics
+    public var onSelect: (MetricType) -> Void
 
-    public init(metrics: DashboardMetrics) {
+    public init(metrics: DashboardMetrics, onSelect: @escaping (MetricType) -> Void) {
         self.metrics = metrics
+        self.onSelect = onSelect
     }
 
     public var body: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
-            MetricCard(title: "New Signups", value: "\(metrics.newSignups)")
-            MetricCard(title: "Retention Rate", value: "\(String(format: "%.1f", metrics.userRetentionRate))%")
-            MetricCard(title: "Avg Access", value: "\(String(format: "%.2f", metrics.averageAccessFrequency))")
-            MetricCard(title: "User Growth", value: "\(String(format: "%.1f", metrics.userGrowthRate))%")
+            ForEach(MetricType.allCases, id: \.self) { metric in
+                Button(action: { onSelect(metric) }) {
+                    MetricCard(title: metric.title, value: getMetricValue(for: metric))
+                }
+            }
         }
         .padding()
     }
+
+    private func getMetricValue(for metric: MetricType) -> String {
+        switch metric {
+        case .newSignups: return "\(metrics.newSignups)"
+        case .retentionRate: return "\(String(format: "%.1f", metrics.userRetentionRate))%"
+        case .accessFrequency: return "\(String(format: "%.2f", metrics.averageAccessFrequency))"
+        case .growthRate: return "\(String(format: "%.1f", metrics.userGrowthRate))%"
+        }
+    }
 }
+
 
 public struct MetricCard: View {
     public let title: String
