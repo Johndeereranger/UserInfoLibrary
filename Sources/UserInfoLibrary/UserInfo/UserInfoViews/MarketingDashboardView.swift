@@ -7,9 +7,12 @@
 
 import SwiftUI
 
+import SwiftUI
+
 public struct MarketingDashboardView: View {
     @StateObject private var viewModel = MarketingDashboardViewModel()
     @State private var selectedMetric: MetricType?
+
     public init() {}
 
     public var body: some View {
@@ -22,20 +25,33 @@ public struct MarketingDashboardView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
-                
+
                 MetricsGridView(metrics: viewModel.metrics) { metric in
                     selectedMetric = metric
                 }
-                
+
                 Spacer()
             }
             .navigationTitle("Marketing Dashboard")
             .onChange(of: viewModel.selectedFilter) { _ in
                 viewModel.computeMetrics()
             }
+            .background(
+                NavigationLink(
+                    destination: selectedMetric.map { MetricDetailView(metric: $0, viewModel: viewModel) },
+                    isActive: Binding(
+                        get: { selectedMetric != nil },
+                        set: { if !$0 { selectedMetric = nil } }
+                    )
+                ) {
+                    EmptyView()
+                }
+                .hidden()
+            )
         }
     }
 }
+
 
 public struct MetricsGridView: View {
     public let metrics: DashboardMetrics

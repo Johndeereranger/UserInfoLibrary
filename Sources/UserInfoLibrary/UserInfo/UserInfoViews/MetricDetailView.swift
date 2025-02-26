@@ -8,55 +8,40 @@
 import SwiftUI
 import Charts
 
+import SwiftUI
+import Charts
+
 public struct MetricDetailView: View {
-    public let metricTitle: String
-    public let metricData: [Date: Int] // Date-based trend data
-    public let metricValue: String // Summary value (e.g., "15%" growth)
-    
-    public init(metricTitle: String, metricData: [Date: Int], metricValue: String) {
-        self.metricTitle = metricTitle
-        self.metricData = metricData
-        self.metricValue = metricValue
-    }
+    public let metric: MetricType
+    @ObservedObject var viewModel: MarketingDashboardViewModel
 
     public var body: some View {
         VStack {
-            Text(metricTitle)
-                .font(.largeTitle)
-                .bold()
+            Text(metric.title).font(.largeTitle).bold()
+            Text(viewModel.getMetricValue(for: metric)).font(.title2)
 
-            Text("Current Value: \(metricValue)")
-                .font(.headline)
-                .padding(.bottom, 10)
-
-            // Line Chart
             if #available(iOS 16.0, *) {
+                let sortedData = viewModel.getMetricData(for: metric).sorted { $0.key < $1.key } // Sort by date
+
                 Chart {
-                    ForEach(metricData.keys.sorted(), id: \.self) { date in
-                        if let value = metricData[date] {
-                            LineMark(
-                                x: .value("Date", date),
-                                y: .value("Value", value)
-                            )
-                        }
+                    ForEach(sortedData, id: \.key) { entry in
+                        LineMark(
+                            x: .value("Date", entry.key),
+                            y: .value("Value", entry.value)
+                        )
                     }
                 }
                 .frame(height: 250)
-                .padding()
             } else {
-                Text("Charts require iOS 16.0 or later.")
+                Text("Charts require iOS 16+")
             }
-            
-            // Raw Data List
-            List {
-                ForEach(metricData.keys.sorted(), id: \.self) { date in
-                    if let value = metricData[date] {
-                        HStack {
-                            Text(date.formatted(date: .abbreviated, time: .omitted))
-                            Spacer()
-                            Text("\(value)")
-                        }
-                    }
+
+
+            List(viewModel.getMetricData(for: metric).keys.sorted(), id: \.self) { date in
+                HStack {
+                    Text(date.formatted(date: .abbreviated, time: .omitted))
+                    Spacer()
+                    Text("\(viewModel.getMetricData(for: metric)[date] ?? 0)")
                 }
             }
         }
