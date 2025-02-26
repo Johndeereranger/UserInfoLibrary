@@ -179,7 +179,10 @@ public struct DashboardMetrics {
 
 public extension String {
     func toDate() -> Date? {
-        let formatter = ISO8601DateFormatter()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"  // ✅ Matches "2025-01-11"
+        formatter.timeZone = TimeZone(identifier: "UTC") // ✅ Ensures consistent date parsing
         return formatter.date(from: self)
     }
 }
+
