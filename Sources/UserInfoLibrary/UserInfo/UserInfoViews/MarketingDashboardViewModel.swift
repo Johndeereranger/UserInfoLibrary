@@ -42,13 +42,18 @@ public class MarketingDashboardViewModel: ObservableObject {
     private func filterUsersByDateRange(users: [UserInfo], filter: DateRangeFilter) -> [UserInfo] {
         let now = Date()
         let calendar = Calendar.current
-
+        print("Current Date, \(now)")
         switch filter {
         case .last7Days:
-            let cutoffDate = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+            let cutoffDate = calendar.date(byAdding: .day, value: -100, to: now) ?? now
             return users.filter { user in
-                guard let signUpDate = user.signUpDate?.toDate() else { return false }
-                return signUpDate >= cutoffDate
+                guard let signUpDate = user.signUpDate?.toDate() else {
+                    print("Failed to convert signUpDate to Date")
+                    return false }
+                let isIncluded = signUpDate >= cutoffDate
+                print("Signup date: \(signUpDate), isIncluded: \(isIncluded)")
+                return isIncluded
+            
             }
 
         case .last30Days:
