@@ -42,27 +42,45 @@ public class MarketingDashboardViewModel: ObservableObject {
     private func filterUsersByDateRange(users: [UserInfo], filter: DateRangeFilter) -> [UserInfo] {
         let now = Date()
         let calendar = Calendar.current
-        let cutoffDate: Date
 
         switch filter {
         case .last7Days:
-            cutoffDate = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+            let cutoffDate = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+            return users.filter { user in
+                guard let signUpDate = user.signUpDate?.toDate() else { return false }
+                return signUpDate >= cutoffDate
+            }
+
         case .last30Days:
-            cutoffDate = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+            let cutoffDate = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+            return users.filter { user in
+                guard let signUpDate = user.signUpDate?.toDate() else { return false }
+                return signUpDate >= cutoffDate
+            }
+
+
         case .yearOverYear:
             let oneYearAgo = calendar.date(byAdding: .year, value: -1, to: now) ?? now
+            let thisMonthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
+            let lastYearSameMonthStart = calendar.date(byAdding: .year, value: -1, to: thisMonthStart) ?? oneYearAgo
+            let lastYearNextMonthStart = calendar.date(byAdding: .month, value: 1, to: lastYearSameMonthStart) ?? now
+
             let thisYearUsers = users.filter { user in
                 guard let signUpDate = user.signUpDate?.toDate() else { return false }
-                return calendar.isDate(signUpDate, equalTo: now, toGranularity: .month)
+                return signUpDate >= thisMonthStart && signUpDate < calendar.date(byAdding: .month, value: 1, to: thisMonthStart) ?? now
             }
+            
             let lastYearUsers = users.filter { user in
                 guard let signUpDate = user.signUpDate?.toDate() else { return false }
-                return calendar.isDate(signUpDate, equalTo: oneYearAgo, toGranularity: .month)
+                return signUpDate >= lastYearSameMonthStart && signUpDate < lastYearNextMonthStart
             }
 
             print("Users this year: \(thisYearUsers.count), Users last year: \(lastYearUsers.count)")
 
-            return thisYearUsers
+            // Returning both current and previous year’s users for comparison
+            return thisYearUsers + lastYearUsers
+
+
         case .custom(let startDate, let endDate):
             return users.filter { user in
                 guard let signUpDate = user.signUpDate?.toDate() else { return false }
@@ -70,11 +88,9 @@ public class MarketingDashboardViewModel: ObservableObject {
             }
         }
 
-        return users.filter { user in
-            guard let signUpDate = user.signUpDate?.toDate() else { return false }
-            return signUpDate >= cutoffDate
-        }
+        return []
     }
+
 
     private func calculateUserGrowthRate(users: [UserInfo]) -> Double {
         let calendar = Calendar.current
@@ -91,9 +107,13 @@ public class MarketingDashboardViewModel: ObservableObject {
         let previousCount = Double(previousMonthUsers.count)
         let currentCount = Double(currentMonthUsers.count)
 
-        if previousCount == 0 { return 0 }
+        if previousCount == 0 {
+            return currentCount > 0 ? 100.0 : 0.0 // If new users exist but no previous users, show 100% growth
+        }
+
         return ((currentCount - previousCount) / previousCount) * 100
     }
+
 
     private func calculateAverageAccessFrequency(users: [UserInfo]) -> Double {
         let accessCounts = users.compactMap { $0.accessDates?.count }
@@ -102,9 +122,12 @@ public class MarketingDashboardViewModel: ObservableObject {
     }
 
     private func calculateRetentionRate(users: [UserInfo]) -> Double {
+        if users.isEmpty { return 0 }
+
         let retainedUsers = users.filter { $0.accessDates?.count ?? 0 > 1 }
-        return Double(retainedUsers.count) / Double(users.count) * 100
+        return (Double(retainedUsers.count) / Double(users.count)) * 100
     }
+
 }
 
 public enum DateRangeFilter: Hashable, Equatable {
