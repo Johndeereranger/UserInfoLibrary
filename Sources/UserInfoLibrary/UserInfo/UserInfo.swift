@@ -20,7 +20,7 @@ public struct UserInfo: Sendable, Codable {
     // Core required fields
     public let id: String
     public let documentID: String
-    
+    public let docID: String
 
     // General optional fields
     public let uid: String?
@@ -68,6 +68,7 @@ public struct UserInfo: Sendable, Codable {
     public init(
         id: String,
         documentID: String,
+        docID: String,
         uid: String? = nil,
         email: String? = nil,
         name: String? = nil,
@@ -92,6 +93,7 @@ public struct UserInfo: Sendable, Codable {
     ) {
         self.id = id
         self.documentID = documentID
+        self.docID = docID
         self.uid = uid
         self.email = email
         self.name = name
@@ -122,7 +124,7 @@ public struct UserInfo: Sendable, Codable {
               }
 
               self.documentID = extractedDocumentID
-
+        self.docID = extractedDocumentID
         // Parse known fields
         self.id = extractedDocumentID
         
