@@ -16,7 +16,7 @@ public struct MarketingDashboardView: View {
     public init() {}
 
     public var body: some View {
-        NavigationView {
+    
             VStack {
                 Picker("Select Time Frame", selection: $viewModel.selectedFilter) {
                     Text("Last 7 Days").tag(DateRangeFilter.last7Days)
@@ -48,7 +48,7 @@ public struct MarketingDashboardView: View {
                 }
                 .hidden()
             )
-        }
+        
     }
 }
 

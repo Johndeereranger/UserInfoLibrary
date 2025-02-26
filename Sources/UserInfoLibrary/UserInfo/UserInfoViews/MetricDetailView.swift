@@ -10,6 +10,8 @@ import Charts
 
 import SwiftUI
 import Charts
+import SwiftUI
+import Charts
 
 public struct MetricDetailView: View {
     public let metric: MetricType
@@ -17,18 +19,41 @@ public struct MetricDetailView: View {
 
     public var body: some View {
         VStack {
+            // Title & Summary
             Text(metric.title).font(.largeTitle).bold()
             Text(viewModel.getMetricValue(for: metric)).font(.title2)
 
-            if #available(iOS 16.0, *) {
-                let sortedData = viewModel.getMetricData(for: metric).sorted { $0.key < $1.key } // Sort by date
+            let metricData = viewModel.getMetricData(for: metric)
+            let sortedData = metricData.sorted { $0.key < $1.key }
+            let movingAvgData = calculateMovingAverage(sortedData, period: 7)
 
+            if #available(iOS 16.0, *) {
                 Chart {
+                    // Raw Data Line (Daily Values)
                     ForEach(sortedData, id: \.key) { entry in
                         LineMark(
                             x: .value("Date", entry.key),
-                            y: .value("Value", entry.value)
+                            y: .value("Signups", entry.value)
                         )
+                        .foregroundStyle(.blue)
+                    }
+
+                    let sortedMovingAvgData = movingAvgData.sorted { $0.key < $1.key }
+
+                    ForEach(sortedMovingAvgData, id: \.key) { entry in
+                        LineMark(
+                            x: .value("Date", entry.key),
+                            y: .value("7-Day Avg", entry.value)
+                        )
+                        .foregroundStyle(.red)
+                    }
+
+                }
+                .chartXAxis {
+                    AxisMarks(position: .bottom, values: .automatic) { value in
+                        if let dateValue = value.as(Date.self) {
+                            AxisValueLabel(dateValue.formatted(date: .abbreviated, time: .omitted))
+                        }
                     }
                 }
                 .frame(height: 250)
@@ -36,15 +61,34 @@ public struct MetricDetailView: View {
                 Text("Charts require iOS 16+")
             }
 
-
-            List(viewModel.getMetricData(for: metric).keys.sorted(), id: \.self) { date in
+            // Raw Data Table
+            List(sortedData, id: \.key) { entry in
+                let movingAvg = movingAvgData[entry.key] ?? 0
                 HStack {
-                    Text(date.formatted(date: .abbreviated, time: .omitted))
+                    Text(entry.key.formatted(date: .abbreviated, time: .omitted))
                     Spacer()
-                    Text("\(viewModel.getMetricData(for: metric)[date] ?? 0)")
+                    Text("\(entry.value)")
+                    Spacer()
+                    Text("\(movingAvg)") // Show moving average
+                        .foregroundColor(.red)
                 }
             }
         }
         .padding()
     }
+    
+    private func calculateMovingAverage(_ data: [(key: Date, value: Int)], period: Int) -> [Date: Double] {
+        var movingAverages: [Date: Double] = [:]
+        let sortedDates = data.map { $0.key }
+
+        for (index, currentDate) in sortedDates.enumerated() {
+            let startIndex = max(0, index - (period - 1)) // Look back 7 days
+            let subset = data[startIndex...index].map { $0.value }
+            let avg = Double(subset.reduce(0, +)) / Double(subset.count)
+            movingAverages[currentDate] = avg
+        }
+
+        return movingAverages
+    }
+
 }
