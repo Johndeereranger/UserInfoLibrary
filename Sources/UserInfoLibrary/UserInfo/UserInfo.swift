@@ -214,3 +214,12 @@ public func extractDocumentID(from document: DocumentSnapshot) -> String? {
     // Fallback to Firestore's document.documentID
     return document.documentID
 }
+extension UserInfo: Identifiable, Hashable, Equatable {
+    public static func == (lhs: UserInfo, rhs: UserInfo) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
