@@ -120,6 +120,68 @@ public class FirebaseImageManager: @unchecked Sendable  {
         }
     }
     
+
+    public func deleteImage(from urlString: String) {
+        guard let url = URL(string: urlString) else {
+            print("❌ Invalid URL: \(urlString)")
+            return
+        }
+
+        // Extract the Firebase Storage reference path from the URL
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let pathQueryItem = components.queryItems?.first(where: { $0.name == "alt" }),
+              pathQueryItem.value == "media",
+              let bucketRange = components.path.range(of: "/o/") else {
+            print("❌ Unable to extract storage path from URL: \(urlString)")
+            return
+        }
+
+        // Firebase Storage path is everything after "/o/"
+        let firebaseStoragePath = String(components.path[bucketRange.upperBound...])
+
+        // Decode the path (Firebase encodes spaces and special characters)
+        let decodedPath = firebaseStoragePath.removingPercentEncoding ?? firebaseStoragePath
+
+        let storageRef = Storage.storage().reference(withPath: decodedPath)
+
+        // Perform deletion
+        storageRef.delete { error in
+            if let error = error {
+                print("❌ Error deleting image: \(error.localizedDescription)")
+            } else {
+                print("✅ Successfully deleted image from Firebase Storage: \(decodedPath)")
+            }
+        }
+    }
+    
+    public func deleteImage(from urlString: String) async throws {
+        guard let url = URL(string: urlString) else {
+            throw StorageError.invalidURL
+        }
+
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let pathRange = components.path.range(of: "/o/") else {
+            throw StorageError.invalidStoragePath
+        }
+
+        // Extract encoded path and decode it
+        let encodedPath = String(components.path[pathRange.upperBound...])
+        let decodedPath = encodedPath.removingPercentEncoding ?? encodedPath
+
+        let storageRef = Storage.storage().reference(withPath: decodedPath)
+
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            storageRef.delete { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
+    
 }
 
 public enum StorageError: Error {
@@ -127,6 +189,8 @@ public enum StorageError: Error {
     case failedToConvertDataToImage
     case downloadError
     case unknown
+    case invalidURL
+    case invalidStoragePath
 }
 
 
