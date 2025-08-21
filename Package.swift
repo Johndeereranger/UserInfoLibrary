@@ -6,7 +6,8 @@ import PackageDescription
 let package = Package(
     name: "UserInfoLibrary",
     platforms: [
-           .iOS(.v15) // Ensure iOS 13 is the minimum deployment target
+           .iOS(.v15), // Ensure iOS 13 is the minimum deployment target
+            .macOS(.v10_15)
        ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
